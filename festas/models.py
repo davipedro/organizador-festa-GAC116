@@ -92,3 +92,24 @@ class Convidado(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class Tarefa(models.Model):
+    """Item da lista de preparativos de uma festa."""
+
+    festa = models.ForeignKey(
+        Festa,
+        on_delete=models.CASCADE,
+        related_name='tarefas',
+        verbose_name='festa',
+    )
+    titulo = models.CharField('título', max_length=160)
+    concluida = models.BooleanField('concluída', default=False)
+
+    class Meta:
+        verbose_name = 'tarefa'
+        verbose_name_plural = 'tarefas'
+        ordering = ['concluida', 'titulo']
+
+    def __str__(self):
+        return self.titulo

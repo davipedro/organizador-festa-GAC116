@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Convidado, Festa, TipoFesta
+from .models import Convidado, Festa, Tarefa, TipoFesta
 
 
 @admin.register(TipoFesta)
@@ -17,3 +17,8 @@ class FestaAdmin(admin.ModelAdmin):
 @admin.register(Convidado)
 class ConvidadoAdmin(admin.ModelAdmin):
     list_display = ('nome', 'festa', 'status', 'contato')
+
+
+@admin.register(Tarefa)
+class TarefaAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'festa', 'concluida')
