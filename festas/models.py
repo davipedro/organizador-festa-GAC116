@@ -59,3 +59,57 @@ class Festa(models.Model):
 
     def __str__(self):
         return f'{self.nome} ({self.data:%d/%m/%Y})'
+
+
+class Convidado(models.Model):
+    """Pessoa convidada para uma festa, com o status da confirmação."""
+
+    class Status(models.TextChoices):
+        PENDENTE = 'pendente', 'Pendente'
+        VOU = 'vou', 'Vou'
+        TALVEZ = 'talvez', 'Talvez'
+        NAO_VOU = 'nao_vou', 'Não vou'
+
+    festa = models.ForeignKey(
+        Festa,
+        on_delete=models.CASCADE,
+        related_name='convidados',
+        verbose_name='festa',
+    )
+    nome = models.CharField('nome', max_length=120)
+    contato = models.CharField('contato', max_length=120, blank=True)
+    status = models.CharField(
+        'status',
+        max_length=10,
+        choices=Status,
+        default=Status.PENDENTE,
+    )
+
+    class Meta:
+        verbose_name = 'convidado'
+        verbose_name_plural = 'convidados'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
+class Tarefa(models.Model):
+    """Item da lista de preparativos de uma festa."""
+
+    festa = models.ForeignKey(
+        Festa,
+        on_delete=models.CASCADE,
+        related_name='tarefas',
+        verbose_name='festa',
+    )
+    titulo = models.CharField('título', max_length=160)
+    concluida = models.BooleanField('concluída', default=False)
+
+    class Meta:
+        verbose_name = 'tarefa'
+        verbose_name_plural = 'tarefas'
+        ordering = ['concluida', 'titulo']
+
+    def __str__(self):
+        return self.titulo
