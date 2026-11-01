@@ -91,6 +91,11 @@ class AdminFestasTests(TestCase):
                 # o campo numérico do navegador envia sempre com ponto
                 'orcamento_estimado': '800.00',
                 'custo_medio_por_pessoa': '45.50',
+                # campos de controle dos inlines (nenhum convidado/tarefa novo)
+                'convidados-TOTAL_FORMS': '0',
+                'convidados-INITIAL_FORMS': '0',
+                'tarefas-TOTAL_FORMS': '0',
+                'tarefas-INITIAL_FORMS': '0',
             },
         )
         erros = resposta.context['adminform'].form.errors if resposta.context else ''
@@ -159,3 +164,91 @@ class ConvidadoTarefaTests(TestCase):
         self.assertEqual((r1.status_code, r2.status_code), (302, 302))
         self.assertEqual(Convidado.objects.get(nome='Carla').status, 'vou')
         self.assertTrue(Tarefa.objects.filter(titulo='Reservar o salão').exists())
+
+
+class AdminListaDeFestasTests(TestCase):
+    def setUp(self):
+        ana = get_user_model().objects.create_user(username='ana', password='x')
+        bruno = get_user_model().objects.create_user(username='bruno', password='x')
+        get_user_model().objects.create_superuser(
+            username='admin', password='senha-de-teste-123'
+        )
+        self.client.login(username='admin', password='senha-de-teste-123')
+        self.aniversario = TipoFesta.objects.create(nome='Aniversário')
+        self.churrasco = TipoFesta.objects.create(nome='Churrasco')
+
+        def festa(dono, tipo, nome, dia, local):
+            return Festa.objects.create(
+                dono=dono, tipo=tipo, nome=nome, data=dia,
+                horario=time(19, 0), local=local,
+            )
+
+        self.f1 = festa(ana, self.aniversario, 'Aniversário da Ana',
+                        date(2026, 12, 5), 'Salão do prédio')
+        self.f2 = festa(ana, self.churrasco, 'Churrasco de fim de ano',
+                        date(2026, 12, 20), 'Chácara do Zé')
+        self.f3 = festa(bruno, self.aniversario, 'Aniversário do Bruno',
+                        date(2027, 1, 10), 'Casa do Bruno')
+        for nome, status in [('Bia', 'vou'), ('Caio', 'vou'), ('Duda', 'talvez')]:
+            Convidado.objects.create(festa=self.f1, nome=nome, status=status)
+        for nome, status in [('Eva', 'nao_vou'), ('Fabio', 'pendente')]:
+            Convidado.objects.create(festa=self.f2, nome=nome, status=status)
+
+    def nomes(self, **filtros):
+        resposta = self.client.get('/admin/festas/festa/', filtros)
+        self.assertEqual(resposta.status_code, 200)
+        return [festa.nome for festa in resposta.context['cl'].result_list]
+
+    def test_lista_mostra_numero_de_confirmados(self):
+        resposta = self.client.get('/admin/festas/festa/')
+        confirmados = {
+            f.nome: f.total_confirmados for f in resposta.context['cl'].result_list
+        }
+        self.assertEqual(confirmados['Aniversário da Ana'], 2)
+        self.assertEqual(confirmados['Churrasco de fim de ano'], 0)
+        self.assertEqual(confirmados['Aniversário do Bruno'], 0)
+
+    def test_filtro_por_tipo(self):
+        self.assertEqual(
+            self.nomes(tipo__id__exact=self.churrasco.pk),
+            ['Churrasco de fim de ano'],
+        )
+
+    def test_filtro_por_data(self):
+        nomes = self.nomes(data__gte='2026-12-10', data__lt='2027-01-01')
+        self.assertEqual(nomes, ['Churrasco de fim de ano'])
+
+    def test_filtro_por_status_dos_convidados(self):
+        self.assertEqual(self.nomes(status_convidado='talvez'), ['Aniversário da Ana'])
+        self.assertEqual(self.nomes(status_convidado='pendente'),
+                         ['Churrasco de fim de ano'])
+
+    def test_filtro_por_status_nao_repete_festa_nem_muda_a_contagem(self):
+        # a festa tem 2 convidados "vou": não pode aparecer duas vezes
+        resposta = self.client.get('/admin/festas/festa/', {'status_convidado': 'vou'})
+        lista = list(resposta.context['cl'].result_list)
+        self.assertEqual([f.nome for f in lista], ['Aniversário da Ana'])
+        self.assertEqual(lista[0].total_confirmados, 2)
+
+    def test_filtro_por_status_com_talvez_mantem_contagem_de_confirmados(self):
+        resposta = self.client.get('/admin/festas/festa/', {'status_convidado': 'talvez'})
+        self.assertEqual(resposta.context['cl'].result_list[0].total_confirmados, 2)
+
+    def test_busca_por_nome_local_e_dono(self):
+        self.assertEqual(self.nomes(q='Churrasco'), ['Churrasco de fim de ano'])
+        self.assertEqual(self.nomes(q='Chácara'), ['Churrasco de fim de ano'])
+        self.assertEqual(self.nomes(q='bruno'), ['Aniversário do Bruno'])
+
+    def test_navegacao_por_data(self):
+        nomes = self.nomes(data__year=2026, data__month=12)
+        self.assertEqual(
+            nomes, ['Aniversário da Ana', 'Churrasco de fim de ano']
+        )
+
+    def test_tela_da_festa_tem_convidados_e_tarefas_editaveis(self):
+        resposta = self.client.get(f'/admin/festas/festa/{self.f1.pk}/change/')
+        self.assertEqual(resposta.status_code, 200)
+        modelos = {
+            formset.formset.model for formset in resposta.context['inline_admin_formsets']
+        }
+        self.assertEqual(modelos, {Convidado, Tarefa})
