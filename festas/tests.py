@@ -60,3 +60,42 @@ class FestaTests(TestCase):
     def test_nome_legivel(self):
         self.assertEqual(str(self.tipo), 'Aniversário')
         self.assertEqual(str(self.criar_festa()), 'Aniversário da Ana (05/12/2026)')
+
+
+class AdminFestasTests(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_superuser(
+            username='admin', password='senha-de-teste-123'
+        )
+        self.client.login(username='admin', password='senha-de-teste-123')
+
+    def test_cadastra_tipo_de_festa_pelo_admin(self):
+        resposta = self.client.post(
+            '/admin/festas/tipofesta/add/', {'nome': 'Churrasco'}
+        )
+        self.assertEqual(resposta.status_code, 302)
+        self.assertTrue(TipoFesta.objects.filter(nome='Churrasco').exists())
+
+    def test_cadastra_festa_pelo_admin(self):
+        tipo = TipoFesta.objects.create(nome='Churrasco')
+        resposta = self.client.post(
+            '/admin/festas/festa/add/',
+            {
+                'dono': self.admin.pk,
+                'tipo': tipo.pk,
+                'nome': 'Churrasco de fim de ano',
+                'data': '20/12/2026',
+                'horario': '13:00',
+                'local': 'Chácara do Zé',
+                'descricao': '',
+                # o campo numérico do navegador envia sempre com ponto
+                'orcamento_estimado': '800.00',
+                'custo_medio_por_pessoa': '45.50',
+            },
+        )
+        erros = resposta.context['adminform'].form.errors if resposta.context else ''
+        self.assertEqual(resposta.status_code, 302, erros)
+        festa = Festa.objects.get(nome='Churrasco de fim de ano')
+        self.assertEqual(festa.dono, self.admin)
+        self.assertEqual(festa.tipo, tipo)
+        self.assertEqual(festa.custo_medio_por_pessoa, Decimal('45.50'))
