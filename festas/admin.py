@@ -24,12 +24,23 @@ class TipoFestaAdmin(admin.ModelAdmin):
     search_fields = ('nome',)
 
 
+class ConvidadoInline(admin.TabularInline):
+    model = Convidado
+    extra = 1
+
+
+class TarefaInline(admin.TabularInline):
+    model = Tarefa
+    extra = 1
+
+
 @admin.register(Festa)
 class FestaAdmin(admin.ModelAdmin):
     list_display = ('nome', 'tipo', 'data', 'horario', 'local', 'dono')
     list_filter = ('tipo', 'data', StatusConvidadoFilter)
     search_fields = ('nome', 'local', 'dono__username', 'dono__first_name')
     date_hierarchy = 'data'
+    inlines = [ConvidadoInline, TarefaInline]
 
 
 @admin.register(Convidado)
