@@ -103,6 +103,16 @@ Previstas para as próximas entregas:
 - Painel "Minhas festas" com o resumo de cada festa e o custo estimado.
 - Interface responsiva, com tema claro e escuro.
 
+## Como trabalhamos (Git)
+
+- `main`: versão estável. Só recebe o que já está pronto e testado.
+- `develop`: onde as funcionalidades são integradas.
+- `feature/<nome>`: uma branch para cada tarefa, criada a partir da `develop`.
+
+Fluxo: criar a branch `feature/<nome>`, fazer commits pequenos, abrir um Pull Request para a `develop` e pedir revisão do outro integrante. Antes de abrir o PR, atualizar a branch com `git pull origin develop` e rodar `python manage.py test`.
+
+Mensagens de commit em português, com um prefixo: `feat:` (funcionalidade), `fix:` (correção), `docs:` (documentação), `test:` (testes) e `chore:` (configuração e manutenção).
+
 ## Estrutura do projeto
 
 ```
