@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count, Q
 
 from .models import Convidado, Festa, Tarefa, TipoFesta
 
@@ -14,7 +15,10 @@ class StatusConvidadoFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value():
-            return queryset.filter(convidados__status=self.value()).distinct()
+            # subconsulta em vez de join: não repete a festa quando ela tem
+            # vários convidados com o mesmo status e não altera a contagem
+            com_status = Convidado.objects.filter(status=self.value())
+            return queryset.filter(pk__in=com_status.values('festa_id'))
         return queryset
 
 
@@ -36,11 +40,25 @@ class TarefaInline(admin.TabularInline):
 
 @admin.register(Festa)
 class FestaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'tipo', 'data', 'horario', 'local', 'dono')
+    list_display = (
+        'nome', 'tipo', 'data', 'horario', 'local', 'dono', 'confirmados'
+    )
     list_filter = ('tipo', 'data', StatusConvidadoFilter)
     search_fields = ('nome', 'local', 'dono__username', 'dono__first_name')
     date_hierarchy = 'data'
     inlines = [ConvidadoInline, TarefaInline]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            total_confirmados=Count(
+                'convidados',
+                filter=Q(convidados__status=Convidado.Status.VOU),
+            )
+        )
+
+    @admin.display(description='confirmados', ordering='total_confirmados')
+    def confirmados(self, obj):
+        return obj.total_confirmados
 
 
 @admin.register(Convidado)
