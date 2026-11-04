@@ -113,6 +113,10 @@ Fluxo: criar a branch `feature/<nome>`, fazer commits pequenos, abrir um Pull Re
 
 Mensagens de commit em português, com um prefixo: `feat:` (funcionalidade), `fix:` (correção), `docs:` (documentação), `test:` (testes) e `chore:` (configuração e manutenção).
 
+## Banco de dados
+
+O diagrama ER está em [docs/diagrama-er.md](docs/diagrama-er.md) e a descrição de cada campo em [docs/dicionario-de-dados.md](docs/dicionario-de-dados.md).
+
 ## Estrutura do projeto
 
 ```
