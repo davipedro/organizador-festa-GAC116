@@ -1,7 +1,25 @@
+from django import forms
 from django.contrib import admin
+from django.db import models
 from django.db.models import Count, Q
+from django.utils.safestring import mark_safe
 
 from .models import Convidado, Festa, Tarefa, TipoFesta
+
+
+class ReaisInput(forms.NumberInput):
+    """Campo numérico com o prefixo "R$" na frente."""
+
+    def __init__(self, attrs=None):
+        super().__init__({'step': '0.01', 'min': '0', **(attrs or {})})
+
+    def render(self, name, value, attrs=None, renderer=None):
+        campo = super().render(name, value, attrs, renderer)
+        return mark_safe(
+            '<div class="input-group campo-reais">'
+            '<span class="input-group-text">R$</span>'
+            f'{campo}</div>'
+        )
 
 
 class StatusConvidadoFilter(admin.SimpleListFilter):
@@ -57,6 +75,7 @@ class FestaAdmin(admin.ModelAdmin):
     search_fields = ('nome', 'local', 'dono__username', 'dono__first_name')
     date_hierarchy = 'data'
     inlines = [ConvidadoInline, TarefaInline]
+    formfield_overrides = {models.DecimalField: {'widget': ReaisInput}}
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(
