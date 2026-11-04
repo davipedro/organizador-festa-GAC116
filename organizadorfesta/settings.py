@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -127,3 +128,22 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Tema do admin (django-jazzmin)
+
+JAZZMIN_SETTINGS = {
+    'site_title': 'Sua Festa',
+    'site_header': 'Sua Festa',
+    'site_brand': 'Sua Festa',
+    'welcome_sign': 'Bem-vindo ao Sua Festa',
+    'copyright': 'Sua Festa',
+    'show_ui_builder': False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    'theme': 'flatly',
+    'default_theme_mode': 'auto',
+    'navbar': 'navbar-pink navbar-dark',
+    'sidebar': 'sidebar-dark-pink',
+    'accent': 'accent-primary',
+}
