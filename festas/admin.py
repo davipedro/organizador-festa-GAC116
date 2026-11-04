@@ -24,8 +24,18 @@ class StatusConvidadoFilter(admin.SimpleListFilter):
 
 @admin.register(TipoFesta)
 class TipoFestaAdmin(admin.ModelAdmin):
-    list_display = ('nome',)
+    list_display = ('nome', 'total_festas')
     search_fields = ('nome',)
+    ordering = ('nome',)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            qtd_festas=Count('festas')
+        )
+
+    @admin.display(description='festas', ordering='qtd_festas')
+    def total_festas(self, obj):
+        return obj.qtd_festas
 
 
 class ConvidadoInline(admin.TabularInline):
@@ -64,8 +74,14 @@ class FestaAdmin(admin.ModelAdmin):
 @admin.register(Convidado)
 class ConvidadoAdmin(admin.ModelAdmin):
     list_display = ('nome', 'festa', 'status', 'contato')
+    list_filter = ('status', 'festa')
+    search_fields = ('nome', 'contato', 'festa__nome')
+    ordering = ('festa', 'nome')
 
 
 @admin.register(Tarefa)
 class TarefaAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'festa', 'concluida')
+    list_filter = ('concluida', 'festa')
+    search_fields = ('titulo', 'festa__nome')
+    ordering = ('festa', 'concluida', 'titulo')
