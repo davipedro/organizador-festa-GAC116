@@ -124,6 +124,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
@@ -135,9 +137,28 @@ JAZZMIN_SETTINGS = {
     'site_title': 'Sua Festa',
     'site_header': 'Sua Festa',
     'site_brand': 'Sua Festa',
+    'site_logo': 'img/logo.png',
+    'login_logo': 'img/logo.png',
     'welcome_sign': 'Bem-vindo ao Sua Festa',
     'copyright': 'Sua Festa',
+    'custom_css': 'css/admin.css',
     'show_ui_builder': False,
+    'icons': {
+        'contas': 'fas fa-users-cog',
+        'contas.usuario': 'fas fa-user',
+        'festas': 'fas fa-glass-cheers',
+        'festas.festa': 'fas fa-birthday-cake',
+        'festas.tipofesta': 'fas fa-tags',
+        'festas.convidado': 'fas fa-user-friends',
+        'festas.tarefa': 'fas fa-tasks',
+    },
+    'order_with_respect_to': [
+        'festas.festa',
+        'festas.convidado',
+        'festas.tarefa',
+        'festas.tipofesta',
+        'contas',
+    ],
 }
 
 JAZZMIN_UI_TWEAKS = {
