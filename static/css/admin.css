@@ -1,5 +1,38 @@
 .brand-link { letter-spacing: 0.5px; }
 
+/* Barra de filtros e busca: filtros, campo de busca e botões com a mesma altura */
+#changelist-search,
+.actions label {
+    align-items: center;
+}
+
+#changelist-search .form-group {
+    margin: 0;
+}
+
+#changelist-search .select2-container .select2-selection--single,
+.actions .select2-container .select2-selection--single {
+    height: 38px;
+    display: flex;
+    align-items: center;
+}
+
+#changelist-search .select2-container .select2-selection--single .select2-selection__rendered,
+.actions .select2-container .select2-selection--single .select2-selection__rendered {
+    line-height: 36px;
+}
+
+#changelist-search .select2-container .select2-selection--single .select2-selection__arrow,
+.actions .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
+/* Prefixo "R$" dos campos de valor */
+.campo-reais {
+    flex-wrap: nowrap;
+    max-width: 16rem;
+}
+
 /* Seletores de hora e de data (popups do Django) */
 .clockbox,
 .calendarbox {
