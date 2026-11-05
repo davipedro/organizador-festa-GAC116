@@ -115,7 +115,54 @@ Mensagens de commit em português, com um prefixo: `feat:` (funcionalidade), `fi
 
 ## Banco de dados
 
-O diagrama ER está em [docs/diagrama-er.md](docs/diagrama-er.md) e a descrição de cada campo em [docs/dicionario-de-dados.md](docs/dicionario-de-dados.md).
+O banco tem 5 tabelas e 4 relacionamentos, todos de um para muitos. A versão completa do diagrama, com as regras de exclusão, está em [docs/diagrama-er.md](docs/diagrama-er.md), e a descrição de cada campo em [docs/dicionario-de-dados.md](docs/dicionario-de-dados.md).
+
+```mermaid
+erDiagram
+    Usuario ||--o{ Festa : organiza
+    TipoFesta ||--o{ Festa : classifica
+    Festa ||--o{ Convidado : tem
+    Festa ||--o{ Tarefa : tem
+
+    Usuario {
+        int id PK
+        string username UK
+        string email
+        string first_name
+        string last_name
+        boolean is_staff
+        boolean is_active
+    }
+    TipoFesta {
+        int id PK
+        string nome UK
+    }
+    Festa {
+        int id PK
+        int dono_id FK
+        int tipo_id FK
+        string nome
+        date data
+        time horario
+        string local
+        text descricao
+        decimal orcamento_estimado
+        decimal custo_medio_por_pessoa
+    }
+    Convidado {
+        int id PK
+        int festa_id FK
+        string nome
+        string contato
+        string status
+    }
+    Tarefa {
+        int id PK
+        int festa_id FK
+        string titulo
+        boolean concluida
+    }
+```
 
 ## Estrutura do projeto
 
@@ -126,5 +173,7 @@ O diagrama ER está em [docs/diagrama-er.md](docs/diagrama-er.md) e a descriçã
 ├── .env.example           # nomes das variáveis de ambiente
 ├── organizadorfesta/      # configurações do projeto (settings, urls)
 ├── contas/                # usuários (modelo Usuario)
-└── festas/                # festas, tipos de festa, convidados e tarefas
+├── festas/                # festas, tipos de festa, convidados e tarefas
+├── static/                # logo e CSS do tema do admin
+└── docs/                  # diagrama ER e dicionário de dados
 ```
