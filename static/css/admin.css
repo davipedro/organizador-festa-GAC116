@@ -1,5 +1,36 @@
 .brand-link { letter-spacing: 0.5px; }
 
+/* Logo: tamanho na tela de login e na barra lateral */
+.login-logo img {
+    display: block;
+    width: 300px;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 1rem;
+}
+
+.brand-link {
+    text-align: center;
+}
+
+.sidebar-brand .brand-link .brand-image {
+    float: none;
+    display: inline-block;
+    width: 150px;
+    max-width: 90%;
+    height: auto;
+    max-height: none;
+    margin: 0 auto;
+    border-radius: 0;
+    box-shadow: none;
+    opacity: 1;
+}
+
+/* o texto repete o nome que já está no logo */
+.brand-link .brand-text {
+    display: none;
+}
+
 /* Barra de filtros e busca: filtros, campo de busca e botões com a mesma altura */
 #changelist-search,
 .actions label {
