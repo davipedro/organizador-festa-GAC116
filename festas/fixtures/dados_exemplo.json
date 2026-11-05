@@ -1,0 +1,361 @@
+[
+{
+  "model": "contas.usuario",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$gBW9yOFFJLANwfVZUfRM8q$MNHymJTl3XNFMGXRIHNpkhb8x7Rr3zZzeIvyzwQp4X0=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "Administrador",
+    "last_name": "Sistema",
+    "email": "admin@example.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-11-04T03:00:53.741Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "contas.usuario",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$Mycx2FM6HwRltcbtaawWUL$iCGGkxCxKE2G/tIDLbsZe2kN9eDaBkXWp/sHA9DhUq8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "ana",
+    "first_name": "Ana",
+    "last_name": "Souza",
+    "email": "ana@example.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-04T03:00:54.330Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "contas.usuario",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$JlwEo0mDUJqLGB9CCkrmWa$b/jjia2FPwjsxGuPPmY/POiz606XHtcyHNsmWgILPEY=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "bruno",
+    "first_name": "Bruno",
+    "last_name": "Lima",
+    "email": "bruno@example.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-04T03:00:54.896Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "festas.tipofesta",
+  "pk": 1,
+  "fields": {
+    "nome": "Aniversário"
+  }
+},
+{
+  "model": "festas.tipofesta",
+  "pk": 2,
+  "fields": {
+    "nome": "Churrasco"
+  }
+},
+{
+  "model": "festas.tipofesta",
+  "pk": 3,
+  "fields": {
+    "nome": "Confraternização"
+  }
+},
+{
+  "model": "festas.tipofesta",
+  "pk": 4,
+  "fields": {
+    "nome": "Chá de bebê"
+  }
+},
+{
+  "model": "festas.tipofesta",
+  "pk": 5,
+  "fields": {
+    "nome": "Casamento"
+  }
+},
+{
+  "model": "festas.festa",
+  "pk": 1,
+  "fields": {
+    "dono": 2,
+    "tipo": 1,
+    "nome": "Aniversário de 30 anos da Ana",
+    "data": "2026-12-12",
+    "horario": "19:30:00",
+    "local": "Salão de festas Vila Bela, Lavras",
+    "descricao": "Comemoração com jantar e música ao vivo.",
+    "orcamento_estimado": "3500.00",
+    "custo_medio_por_pessoa": "70.00"
+  }
+},
+{
+  "model": "festas.festa",
+  "pk": 2,
+  "fields": {
+    "dono": 3,
+    "tipo": 2,
+    "nome": "Churrasco de fim de ano",
+    "data": "2026-12-19",
+    "horario": "12:00:00",
+    "local": "Chácara do Bruno, Ijaci",
+    "descricao": "Churrasco com a turma da faculdade.",
+    "orcamento_estimado": "1800.00",
+    "custo_medio_por_pessoa": "60.00"
+  }
+},
+{
+  "model": "festas.festa",
+  "pk": 3,
+  "fields": {
+    "dono": 2,
+    "tipo": 3,
+    "nome": "Confraternização da empresa",
+    "data": "2026-12-22",
+    "horario": "20:00:00",
+    "local": "Restaurante Sabor Mineiro, Lavras",
+    "descricao": "",
+    "orcamento_estimado": "6000.00",
+    "custo_medio_por_pessoa": "120.00"
+  }
+},
+{
+  "model": "festas.festa",
+  "pk": 4,
+  "fields": {
+    "dono": 3,
+    "tipo": 4,
+    "nome": "Chá de bebê da Carla",
+    "data": "2027-01-16",
+    "horario": "15:00:00",
+    "local": "Casa da família Ribeiro, Lavras",
+    "descricao": "Chá de bebê com brincadeiras e lembrancinhas.",
+    "orcamento_estimado": "1200.00",
+    "custo_medio_por_pessoa": "40.00"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 1,
+  "fields": {
+    "festa": 1,
+    "nome": "Mariana Oliveira",
+    "contato": "(35) 99811-2233",
+    "status": "vou"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 2,
+  "fields": {
+    "festa": 1,
+    "nome": "Rafael Costa",
+    "contato": "rafael.costa@example.com",
+    "status": "vou"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 3,
+  "fields": {
+    "festa": 1,
+    "nome": "Juliana Martins",
+    "contato": "(35) 99722-4455",
+    "status": "talvez"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 4,
+  "fields": {
+    "festa": 1,
+    "nome": "Pedro Henrique Alves",
+    "contato": "(35) 99633-6677",
+    "status": "nao_vou"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 5,
+  "fields": {
+    "festa": 1,
+    "nome": "Camila Rocha",
+    "contato": "camila.rocha@example.com",
+    "status": "pendente"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 6,
+  "fields": {
+    "festa": 2,
+    "nome": "Lucas Ferreira",
+    "contato": "(35) 99544-8899",
+    "status": "vou"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 7,
+  "fields": {
+    "festa": 2,
+    "nome": "Thiago Almeida",
+    "contato": "(35) 99455-1020",
+    "status": "vou"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 8,
+  "fields": {
+    "festa": 2,
+    "nome": "Beatriz Gomes",
+    "contato": "beatriz.gomes@example.com",
+    "status": "talvez"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 9,
+  "fields": {
+    "festa": 2,
+    "nome": "Gabriel Nunes",
+    "contato": "(35) 99366-3040",
+    "status": "pendente"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 10,
+  "fields": {
+    "festa": 3,
+    "nome": "Fernanda Ribeiro",
+    "contato": "(35) 99277-5060",
+    "status": "vou"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 11,
+  "fields": {
+    "festa": 3,
+    "nome": "Diego Barbosa",
+    "contato": "diego.barbosa@example.com",
+    "status": "nao_vou"
+  }
+},
+{
+  "model": "festas.convidado",
+  "pk": 12,
+  "fields": {
+    "festa": 3,
+    "nome": "Larissa Teixeira",
+    "contato": "(35) 99188-7080",
+    "status": "pendente"
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 1,
+  "fields": {
+    "festa": 1,
+    "titulo": "Reservar o salão",
+    "concluida": true
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 2,
+  "fields": {
+    "festa": 1,
+    "titulo": "Comprar bebidas",
+    "concluida": false
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 3,
+  "fields": {
+    "festa": 1,
+    "titulo": "Encomendar o bolo",
+    "concluida": true
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 4,
+  "fields": {
+    "festa": 2,
+    "titulo": "Comprar a carne",
+    "concluida": false
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 5,
+  "fields": {
+    "festa": 2,
+    "titulo": "Alugar mesas e cadeiras",
+    "concluida": true
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 6,
+  "fields": {
+    "festa": 2,
+    "titulo": "Combinar o transporte",
+    "concluida": false
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 7,
+  "fields": {
+    "festa": 3,
+    "titulo": "Confirmar o cardápio com o restaurante",
+    "concluida": true
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 8,
+  "fields": {
+    "festa": 3,
+    "titulo": "Enviar os convites",
+    "concluida": false
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 9,
+  "fields": {
+    "festa": 4,
+    "titulo": "Escolher as lembrancinhas",
+    "concluida": false
+  }
+},
+{
+  "model": "festas.tarefa",
+  "pk": 10,
+  "fields": {
+    "festa": 4,
+    "titulo": "Decorar a sala",
+    "concluida": false
+  }
+}
+]
