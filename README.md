@@ -86,6 +86,14 @@ O ambiente administrativo fica em http://127.0.0.1:8000/admin/. Para rodar os te
 python manage.py test
 ```
 
+## Dados de exemplo
+
+Para carregar festas, convidados e tarefas de demonstração em um banco novo:
+
+    python manage.py loaddata dados_exemplo
+
+Usuários de demonstração: `admin`, `ana` e `bruno`, todos com a senha `demo12345`.
+
 ## Principais funcionalidades
 
 Disponíveis agora, no ambiente administrativo:
