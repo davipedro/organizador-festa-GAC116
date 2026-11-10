@@ -3,8 +3,11 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.contrib.messages.storage.base import Message
 from django.db.models import ProtectedError
+from django.template.loader import render_to_string
 from django.test import TestCase
+from django.urls import reverse
 
 from .models import Convidado, Festa, Tarefa, TipoFesta
 
@@ -252,3 +255,80 @@ class AdminListaDeFestasTests(TestCase):
             formset.formset.model for formset in resposta.context['inline_admin_formsets']
         }
         self.assertEqual(modelos, {Convidado, Tarefa})
+
+
+class EsqueletoDoSiteTests(TestCase):
+    """URLs do contrato, base.html e login da área do usuário final."""
+
+    ROTAS_DO_CONTRATO = [
+        ('festas:festa_lista', {}),
+        ('festas:festa_nova', {}),
+        ('festas:festa_detalhe', {'pk': 1}),
+        ('festas:festa_editar', {'pk': 1}),
+        ('festas:festa_excluir', {'pk': 1}),
+        ('festas:convidado_novo', {'festa_pk': 1}),
+        ('festas:convidado_editar', {'pk': 1}),
+        ('festas:convidado_excluir', {'pk': 1}),
+        ('festas:tarefa_nova', {'festa_pk': 1}),
+        ('festas:tarefa_alternar', {'pk': 1}),
+        ('festas:tarefa_editar', {'pk': 1}),
+        ('festas:tarefa_excluir', {'pk': 1}),
+    ]
+
+    def setUp(self):
+        self.usuario = get_user_model().objects.create_user(
+            username='ana', password='senha-de-teste-123'
+        )
+
+    def test_raiz_sem_sessao_redireciona_para_o_login(self):
+        resposta = self.client.get('/')
+        self.assertRedirects(resposta, '/contas/login/?next=/')
+
+    def test_todas_as_urls_do_contrato_respondem_para_quem_esta_logado(self):
+        self.client.force_login(self.usuario)
+        for nome, kwargs in self.ROTAS_DO_CONTRATO:
+            with self.subTest(url=nome):
+                resposta = self.client.get(reverse(nome, kwargs=kwargs))
+                self.assertEqual(resposta.status_code, 200)
+
+    def test_urls_da_area_do_usuario_exigem_login(self):
+        for nome, kwargs in self.ROTAS_DO_CONTRATO:
+            with self.subTest(url=nome):
+                resposta = self.client.get(reverse(nome, kwargs=kwargs))
+                self.assertEqual(resposta.status_code, 302)
+                self.assertIn('/contas/login/', resposta['Location'])
+
+    def test_urls_de_login_logout_e_cadastro_existem(self):
+        self.assertEqual(reverse('contas:login'), '/contas/login/')
+        self.assertEqual(reverse('contas:logout'), '/contas/logout/')
+        self.assertEqual(reverse('contas:cadastro'), '/contas/cadastro/')
+        self.assertEqual(self.client.get(reverse('contas:login')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('contas:cadastro')).status_code, 200)
+
+    def test_login_leva_para_a_lista_de_festas(self):
+        resposta = self.client.post(
+            reverse('contas:login'),
+            {'username': 'ana', 'password': 'senha-de-teste-123'},
+        )
+        self.assertRedirects(resposta, reverse('festas:festa_lista'))
+
+    def test_logout_so_por_post_e_volta_para_o_login(self):
+        self.client.force_login(self.usuario)
+        self.assertEqual(
+            self.client.get(reverse('contas:logout')).status_code, 405
+        )
+        resposta = self.client.post(reverse('contas:logout'))
+        self.assertRedirects(resposta, reverse('contas:login'))
+
+    def test_base_usa_bootstrap_local_e_nao_cdn(self):
+        html = render_to_string('base.html', {'messages': []})
+        self.assertIn('vendor/bootstrap/css/bootstrap.min.css', html)
+        self.assertIn('vendor/bootstrap/js/bootstrap.bundle.min.js', html)
+        self.assertNotIn('cdn.', html)
+
+    def test_base_mostra_as_mensagens_do_django(self):
+        html = render_to_string(
+            'base.html', {'messages': [Message(25, 'Festa criada.')]}
+        )
+        self.assertIn('Festa criada.', html)
+        self.assertIn('alert-success', html)

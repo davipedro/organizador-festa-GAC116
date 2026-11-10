@@ -59,7 +59,7 @@ ROOT_URLCONF = 'organizadorfesta.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -168,3 +168,8 @@ JAZZMIN_UI_TWEAKS = {
     'sidebar': 'sidebar-dark-pink',
     'accent': 'accent-primary',
 }
+
+# Área do usuário final
+LOGIN_URL = 'contas:login'
+LOGIN_REDIRECT_URL = 'festas:festa_lista'
+LOGOUT_REDIRECT_URL = 'contas:login'
