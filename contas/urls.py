@@ -6,7 +6,11 @@ from . import views
 app_name = 'contas'
 
 urlpatterns = [
-    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path(
+        'login/',
+        auth_views.LoginView.as_view(redirect_authenticated_user=True),
+        name='login',
+    ),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('cadastro/', views.cadastro, name='cadastro'),
+    path('cadastro/', views.CadastroView.as_view(), name='cadastro'),
 ]
