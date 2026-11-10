@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar exclusão - Sua Festa{% endblock %}
+
+{% block content %}
+  <h1 class="h3 mb-3">Excluir {{ objeto }}?</h1>
+  {% if aviso %}
+    <div class="alert alert-warning" role="alert">{{ aviso }}</div>
+  {% endif %}
+  <p>Essa ação não pode ser desfeita.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Excluir</button>
+    <a class="btn btn-outline-secondary" href="{{ cancelar_url }}">Cancelar</a>
+  </form>
+{% endblock %}

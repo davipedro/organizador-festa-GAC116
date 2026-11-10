@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ festa.nome }} - Sua Festa{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-1">{{ festa.nome }}</h1>
+      <span class="badge text-bg-secondary">{{ festa.tipo }}</span>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary btn-sm" href="{% url 'festas:festa_editar' festa.pk %}">Editar</a>
+      <a class="btn btn-outline-danger btn-sm" href="{% url 'festas:festa_excluir' festa.pk %}">Excluir</a>
+    </div>
+  </div>
+
+  <section id="bloco-resumo" class="mb-4">
+    <p class="mb-1">{{ festa.data|date:'d/m/Y' }} às {{ festa.horario|time:'H:i' }}</p>
+    <p class="mb-3">{{ festa.local }}</p>
+    {% if festa.descricao %}<p>{{ festa.descricao|linebreaksbr }}</p>{% endif %}
+
+    <dl class="row mb-2">
+      <dt class="col-sm-3">Confirmados</dt>
+      <dd class="col-sm-9">{{ festa.confirmados }}</dd>
+      <dt class="col-sm-3">Custo médio por pessoa</dt>
+      <dd class="col-sm-9">R$ {{ festa.custo_medio_por_pessoa|floatformat:2 }}</dd>
+      <dt class="col-sm-3">Custo estimado</dt>
+      <dd class="col-sm-9">R$ {{ festa.custo_estimado|floatformat:2 }}</dd>
+      <dt class="col-sm-3">Orçamento estimado</dt>
+      <dd class="col-sm-9">R$ {{ festa.orcamento_estimado|floatformat:2 }}</dd>
+    </dl>
+    {% if festa.acima_do_orcamento %}
+      <div class="alert alert-warning" role="alert">
+        O custo estimado está acima do orçamento.
+      </div>
+    {% endif %}
+  </section>
+
+  {% include 'festas/_convidados.html' %}
+  {% include 'festas/_tarefas.html' %}
+
+  <a href="{% url 'festas:festa_lista' %}">Voltar para Minhas festas</a>
+{% endblock %}

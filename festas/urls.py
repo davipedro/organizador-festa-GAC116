@@ -6,10 +6,22 @@ app_name = 'festas'
 
 urlpatterns = [
     path('', views.em_construcao, name='festa_lista'),
-    path('festas/nova/', views.em_construcao, name='festa_nova'),
-    path('festas/<int:pk>/', views.em_construcao, name='festa_detalhe'),
-    path('festas/<int:pk>/editar/', views.em_construcao, name='festa_editar'),
-    path('festas/<int:pk>/excluir/', views.em_construcao, name='festa_excluir'),
+    path('festas/nova/', views.FestaNovaView.as_view(), name='festa_nova'),
+    path(
+        'festas/<int:pk>/',
+        views.FestaDetalheView.as_view(),
+        name='festa_detalhe',
+    ),
+    path(
+        'festas/<int:pk>/editar/',
+        views.FestaEditarView.as_view(),
+        name='festa_editar',
+    ),
+    path(
+        'festas/<int:pk>/excluir/',
+        views.FestaExcluirView.as_view(),
+        name='festa_excluir',
+    ),
     path(
         'festas/<int:festa_pk>/convidados/novo/',
         views.em_construcao,
