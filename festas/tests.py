@@ -61,6 +61,62 @@ class FestaTests(TestCase):
         self.assertEqual(str(self.tipo), 'Aniversário')
         self.assertEqual(str(self.criar_festa()), 'Aniversário da Ana (05/12/2026)')
 
+    def convidar(self, festa, status, quantidade=1):
+        for i in range(quantidade):
+            Convidado.objects.create(
+                festa=festa, nome=f'{status} {i}', status=status
+            )
+
+    def test_festa_sem_convidados_nao_tem_confirmados_nem_custo(self):
+        festa = self.criar_festa(custo_medio_por_pessoa=Decimal('50'))
+        self.assertEqual(festa.confirmados, 0)
+        self.assertEqual(festa.custo_estimado, Decimal('0'))
+
+    def test_so_o_status_vou_conta_como_confirmado(self):
+        festa = self.criar_festa()
+        self.convidar(festa, Convidado.Status.VOU, 2)
+        self.convidar(festa, Convidado.Status.PENDENTE, 3)
+        self.convidar(festa, Convidado.Status.TALVEZ, 1)
+        self.convidar(festa, Convidado.Status.NAO_VOU, 4)
+        self.assertEqual(festa.confirmados, 2)
+
+    def test_custo_estimado_e_custo_medio_vezes_confirmados(self):
+        festa = self.criar_festa(custo_medio_por_pessoa=Decimal('37.50'))
+        self.convidar(festa, Convidado.Status.VOU, 4)
+        self.convidar(festa, Convidado.Status.TALVEZ, 2)
+        self.assertEqual(festa.custo_estimado, Decimal('150.00'))
+
+    def test_confirmados_usa_a_anotacao_quando_ela_existe(self):
+        festa = self.criar_festa()
+        self.convidar(festa, Convidado.Status.VOU, 2)
+        festa.total_confirmados = 7
+        self.assertEqual(festa.confirmados, 7)
+
+    def test_custo_acima_do_orcamento_dispara_o_aviso(self):
+        festa = self.criar_festa(
+            orcamento_estimado=Decimal('100'),
+            custo_medio_por_pessoa=Decimal('30'),
+        )
+        self.convidar(festa, Convidado.Status.VOU, 4)
+        self.assertEqual(festa.custo_estimado, Decimal('120'))
+        self.assertTrue(festa.acima_do_orcamento)
+
+    def test_custo_igual_ou_abaixo_do_orcamento_nao_dispara_o_aviso(self):
+        festa = self.criar_festa(
+            orcamento_estimado=Decimal('120'),
+            custo_medio_por_pessoa=Decimal('30'),
+        )
+        self.convidar(festa, Convidado.Status.VOU, 4)
+        self.assertFalse(festa.acima_do_orcamento)
+        self.convidar(festa, Convidado.Status.VOU, 1)
+        self.assertTrue(festa.acima_do_orcamento)
+
+    def test_orcamento_zero_nunca_dispara_o_aviso(self):
+        festa = self.criar_festa(custo_medio_por_pessoa=Decimal('30'))
+        self.convidar(festa, Convidado.Status.VOU, 4)
+        self.assertGreater(festa.custo_estimado, 0)
+        self.assertFalse(festa.acima_do_orcamento)
+
 
 class AdminFestasTests(TestCase):
     def setUp(self):
