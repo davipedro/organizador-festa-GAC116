@@ -1,0 +1,264 @@
+/* Identidade visual do Sua Festa (área do usuário).
+   Tudo gira em torno das variáveis abaixo: cores, tipografia, espaçamento e
+   raio de borda, com valores para o tema claro e para o escuro. */
+
+:root {
+    --fonte-base: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --fonte-titulo: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+
+    --espaco-sm: 0.5rem;
+    --espaco-md: 1rem;
+    --espaco-lg: 2rem;
+
+    --raio-sm: 0.5rem;
+    --raio-md: 0.85rem;
+    --raio-lg: 1.25rem;
+}
+
+/* Tema claro */
+:root,
+[data-bs-theme='light'] {
+    --cor-primaria: #6a3fd6;
+    --cor-primaria-hover: #5530b4;
+    --cor-primaria-suave: #ece6fb;
+    --cor-sobre-primaria: #ffffff;
+    --cor-destaque: #f5a30a;
+    --cor-fundo: #f6f4fc;
+    --cor-superficie: #ffffff;
+    --cor-borda: #dcd6ee;
+    --cor-texto: #1d1840;
+    --cor-texto-suave: #5b567a;
+    --sombra: 0 0.25rem 1rem rgba(46, 26, 110, 0.08);
+}
+
+/* Tema escuro */
+[data-bs-theme='dark'] {
+    --cor-primaria: #a78bff;
+    --cor-primaria-hover: #bfa8ff;
+    --cor-primaria-suave: #2d2552;
+    --cor-sobre-primaria: #15102e;
+    --cor-destaque: #ffbe3d;
+    --cor-fundo: #120f26;
+    --cor-superficie: #1c1838;
+    --cor-borda: #3a3365;
+    --cor-texto: #efecff;
+    --cor-texto-suave: #b4aedb;
+    --sombra: 0 0.25rem 1rem rgba(0, 0, 0, 0.4);
+}
+
+/* Liga as variáveis ao Bootstrap */
+:root,
+[data-bs-theme] {
+    --bs-body-font-family: var(--fonte-base);
+    --bs-body-bg: var(--cor-fundo);
+    --bs-body-color: var(--cor-texto);
+    --bs-secondary-color: var(--cor-texto-suave);
+    --bs-border-color: var(--cor-borda);
+    --bs-link-color: var(--cor-primaria);
+    --bs-link-hover-color: var(--cor-primaria-hover);
+    --bs-link-color-rgb: initial;
+    --bs-border-radius: var(--raio-sm);
+    --bs-border-radius-lg: var(--raio-md);
+}
+
+body {
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+}
+
+a {
+    color: var(--cor-primaria);
+}
+
+a:hover {
+    color: var(--cor-primaria-hover);
+}
+
+h1,
+h2,
+h3,
+h4,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5 {
+    font-family: var(--fonte-titulo);
+    font-weight: 700;
+}
+
+/* Botões */
+.btn {
+    border-radius: var(--raio-sm);
+    font-weight: 600;
+}
+
+.btn-primary {
+    --bs-btn-color: var(--cor-sobre-primaria);
+    --bs-btn-bg: var(--cor-primaria);
+    --bs-btn-border-color: var(--cor-primaria);
+    --bs-btn-hover-color: var(--cor-sobre-primaria);
+    --bs-btn-hover-bg: var(--cor-primaria-hover);
+    --bs-btn-hover-border-color: var(--cor-primaria-hover);
+    --bs-btn-active-color: var(--cor-sobre-primaria);
+    --bs-btn-active-bg: var(--cor-primaria-hover);
+    --bs-btn-active-border-color: var(--cor-primaria-hover);
+    --bs-btn-focus-shadow-rgb: 106, 63, 214;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--cor-primaria);
+    --bs-btn-border-color: var(--cor-primaria);
+    --bs-btn-hover-color: var(--cor-sobre-primaria);
+    --bs-btn-hover-bg: var(--cor-primaria);
+    --bs-btn-hover-border-color: var(--cor-primaria);
+    --bs-btn-active-color: var(--cor-sobre-primaria);
+    --bs-btn-active-bg: var(--cor-primaria-hover);
+    --bs-btn-active-border-color: var(--cor-primaria-hover);
+}
+
+/* Navbar */
+.site-navbar {
+    background: var(--cor-superficie);
+    border-bottom: 1px solid var(--cor-borda);
+    box-shadow: var(--sombra);
+}
+
+.site-navbar .navbar-brand img {
+    height: 2.25rem;
+    width: auto;
+}
+
+.site-navbar .nav-link {
+    color: var(--cor-texto);
+    font-weight: 600;
+    border-radius: var(--raio-sm);
+    padding-inline: var(--espaco-md);
+}
+
+.site-navbar .nav-link:hover,
+.site-navbar .nav-link:focus {
+    color: var(--cor-primaria);
+    background: var(--cor-primaria-suave);
+}
+
+.site-navbar .navbar-toggler {
+    border-color: var(--cor-borda);
+}
+
+.site-navbar .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem var(--cor-primaria-suave);
+}
+
+.site-navbar .navbar-toggler-icon {
+    background-image: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    position: relative;
+    display: inline-block;
+    background-color: var(--cor-texto);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='black' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='black' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.botao-tema {
+    border: 1px solid var(--cor-borda);
+    background: transparent;
+    color: var(--cor-texto);
+    border-radius: 999px;
+    width: 2.5rem;
+    height: 2.5rem;
+    line-height: 1;
+    font-size: 1.1rem;
+}
+
+.botao-tema:hover {
+    background: var(--cor-primaria-suave);
+    color: var(--cor-primaria);
+}
+
+/* Conteúdo */
+.site-main {
+    padding-block: var(--espaco-lg);
+}
+
+.card {
+    --bs-card-bg: var(--cor-superficie);
+    --bs-card-border-color: var(--cor-borda);
+    --bs-card-border-radius: var(--raio-md);
+    --bs-card-cap-bg: var(--cor-primaria-suave);
+    box-shadow: var(--sombra);
+}
+
+/* Formulários (inclui os que o Django desenha com as_p) */
+.form-control,
+.form-select {
+    background-color: var(--cor-superficie);
+    border-color: var(--cor-borda);
+    color: var(--cor-texto);
+    border-radius: var(--raio-sm);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 0.2rem var(--cor-primaria-suave);
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto);
+}
+
+.form-auth p {
+    margin-bottom: var(--espaco-md);
+}
+
+.form-auth label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.form-auth input:not([type='checkbox']):not([type='hidden']),
+.form-auth select,
+.form-auth textarea {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-sm);
+}
+
+.form-auth input:focus,
+.form-auth select:focus,
+.form-auth textarea:focus {
+    outline: 0;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 0.2rem var(--cor-primaria-suave);
+}
+
+.form-auth .helptext,
+.form-auth ul {
+    font-size: 0.85rem;
+    color: var(--cor-texto-suave);
+}
+
+.form-auth .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.25rem;
+    color: var(--bs-danger-text-emphasis, #b02a37);
+}
+
+.cartao-auth {
+    max-width: 28rem;
+    margin-inline: auto;
+}
+
+/* Rodapé */
+.site-footer {
+    border-top: 1px solid var(--cor-borda);
+    color: var(--cor-texto-suave);
+    font-size: 0.9rem;
+    padding-block: var(--espaco-md);
+}
