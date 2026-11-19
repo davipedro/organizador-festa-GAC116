@@ -5,7 +5,7 @@ from . import views
 app_name = 'festas'
 
 urlpatterns = [
-    path('', views.em_construcao, name='festa_lista'),
+    path('', views.FestaListaView.as_view(), name='festa_lista'),
     path('festas/nova/', views.FestaNovaView.as_view(), name='festa_nova'),
     path(
         'festas/<int:pk>/',

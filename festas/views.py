@@ -2,12 +2,20 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Count, Q
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
+from django.utils import timezone
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
 
 from .forms import FestaForm
-from .models import Festa
+from .models import Convidado, Festa, TipoFesta
 
 
 @login_required
@@ -76,3 +84,77 @@ class FestaExcluirView(FestaDoUsuarioMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, f'Festa "{self.object.nome}" excluída.')
         return super().form_valid(form)
+
+
+class FestaListaView(LoginRequiredMixin, ListView):
+    """Minhas festas: só as do usuário logado, com busca e filtros via GET.
+
+    Parâmetros: ``q`` (nome ou local), ``tipo`` (id do tipo de festa) e
+    ``periodo`` (todas, proximas ou passadas; o padrão é proximas). Valores
+    inválidos são ignorados em vez de gerar erro.
+    """
+
+    template_name = 'festas/festa_lista.html'
+    context_object_name = 'festas'
+    PERIODOS = ('todas', 'proximas', 'passadas')
+    PERIODO_PADRAO = 'proximas'
+
+    def get_busca(self):
+        return self.request.GET.get('q', '').strip()
+
+    def get_tipo(self):
+        try:
+            tipo = int(self.request.GET.get('tipo', ''))
+        except ValueError:
+            return None
+        # fora desse intervalo o banco nem teria um tipo com esse id
+        return tipo if 0 < tipo < 2**31 else None
+
+    def get_periodo(self):
+        periodo = self.request.GET.get('periodo', '')
+        return periodo if periodo in self.PERIODOS else self.PERIODO_PADRAO
+
+    def get_queryset(self):
+        festas = (
+            Festa.objects.filter(dono=self.request.user)
+            .select_related('tipo')
+            .annotate(
+                total_confirmados=Count(
+                    'convidados',
+                    filter=Q(convidados__status=Convidado.Status.VOU),
+                )
+            )
+        )
+
+        busca = self.get_busca()
+        if busca:
+            festas = festas.filter(
+                Q(nome__icontains=busca) | Q(local__icontains=busca)
+            )
+
+        tipo = self.get_tipo()
+        if tipo is not None:
+            festas = festas.filter(tipo_id=tipo)
+
+        hoje = timezone.localdate()
+        periodo = self.get_periodo()
+        if periodo == 'proximas':
+            festas = festas.filter(data__gte=hoje)
+        elif periodo == 'passadas':
+            festas = festas.filter(data__lt=hoje)
+
+        return festas.order_by('data', 'horario')
+
+    def get_context_data(self, **kwargs):
+        periodo = self.get_periodo()
+        busca = self.get_busca()
+        tipo = self.get_tipo()
+        return super().get_context_data(
+            busca=busca,
+            tipo_selecionado=tipo,
+            periodo=periodo,
+            tipos=TipoFesta.objects.all(),
+            tem_festas=Festa.objects.filter(dono=self.request.user).exists(),
+            filtro_ativo=bool(busca) or tipo is not None
+            or periodo != self.PERIODO_PADRAO,
+        )
