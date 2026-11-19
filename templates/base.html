@@ -4,25 +4,73 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Sua Festa{% endblock %}</title>
+  <script>
+    /* Aplica o tema antes da página aparecer, para não piscar:
+       escolha salva ou, se não houver, a preferência do sistema. */
+    (function () {
+      var tema = 'light';
+      try {
+        var salvo = localStorage.getItem('sua-festa-tema');
+        if (salvo === 'light' || salvo === 'dark') {
+          tema = salvo;
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          tema = 'dark';
+        }
+      } catch (e) {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          tema = 'dark';
+        }
+      }
+      document.documentElement.setAttribute('data-bs-theme', tema);
+    })();
+  </script>
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
-<body>
-  <nav class="navbar navbar-expand-lg border-bottom">
+<body class="d-flex flex-column min-vh-100">
+  <nav class="navbar navbar-expand-lg site-navbar">
     <div class="container">
-      {% if user.is_authenticated %}
-        <a class="navbar-brand" href="{% url 'festas:festa_lista' %}">Sua Festa</a>
-        <form method="post" action="{% url 'contas:logout' %}" class="ms-auto">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline-secondary btn-sm">Sair</button>
-        </form>
-      {% else %}
-        <span class="navbar-brand">Sua Festa</span>
-      {% endif %}
+      <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'festas:festa_lista' %}{% else %}{% url 'contas:login' %}{% endif %}">
+        <img src="{% static 'img/logo.png' %}" alt="Sua Festa">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#menu-principal" aria-controls="menu-principal"
+              aria-expanded="false" aria-label="Abrir o menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="menu-principal">
+        {% if user.is_authenticated %}
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'festas:festa_lista' %}">Minhas festas</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'festas:festa_nova' %}">Nova festa</a>
+            </li>
+          </ul>
+        {% else %}
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        {% endif %}
+
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" id="botao-tema" class="botao-tema" aria-label="Mudar o tema">&#9790;</button>
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'contas:logout' %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-primary btn-sm">Sair</button>
+            </form>
+          {% else %}
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'contas:login' %}">Entrar</a>
+            <a class="btn btn-primary btn-sm" href="{% url 'contas:cadastro' %}">Cadastrar</a>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </nav>
 
-  <main class="container py-4">
+  <main class="container site-main flex-grow-1">
     {% if messages %}
       {% for message in messages %}
         <div class="alert alert-{{ message.level_tag }}" role="alert">{{ message }}</div>
@@ -32,7 +80,15 @@
     {% block content %}{% endblock %}
   </main>
 
+  <footer class="site-footer">
+    <div class="container d-flex flex-wrap justify-content-between gap-2">
+      <span>Sua Festa</span>
+      <span>Trabalho prático de GAC116 - Programação Web</span>
+    </div>
+  </footer>
+
   <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/tema.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
