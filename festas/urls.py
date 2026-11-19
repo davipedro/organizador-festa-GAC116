@@ -39,18 +39,22 @@ urlpatterns = [
     ),
     path(
         'festas/<int:festa_pk>/tarefas/nova/',
-        views.em_construcao,
+        views.tarefa_nova,
         name='tarefa_nova',
     ),
     path(
         'tarefas/<int:pk>/alternar/',
-        views.em_construcao,
+        views.tarefa_alternar,
         name='tarefa_alternar',
     ),
-    path('tarefas/<int:pk>/editar/', views.em_construcao, name='tarefa_editar'),
+    path(
+        'tarefas/<int:pk>/editar/',
+        views.TarefaEditarView.as_view(),
+        name='tarefa_editar',
+    ),
     path(
         'tarefas/<int:pk>/excluir/',
-        views.em_construcao,
+        views.TarefaExcluirView.as_view(),
         name='tarefa_excluir',
     ),
 ]
