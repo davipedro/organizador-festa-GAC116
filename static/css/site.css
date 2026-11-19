@@ -306,6 +306,23 @@ h4,
     margin-inline: auto;
 }
 
+/* Mensagens: avisos fixos no canto, visíveis em qualquer ponto da página */
+#mensagens {
+    position: fixed;
+    top: 4.75rem;
+    right: var(--espaco-md);
+    left: var(--espaco-md);
+    z-index: 1080;
+    max-width: 24rem;
+    margin-left: auto;
+    pointer-events: none;
+}
+
+#mensagens .alert {
+    pointer-events: auto;
+    box-shadow: var(--sombra);
+}
+
 /* Rodapé */
 .site-footer {
     border-top: 1px solid var(--cor-borda);

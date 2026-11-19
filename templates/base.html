@@ -71,14 +71,14 @@
   </nav>
 
   <main class="container site-main flex-grow-1">
-    {% if messages %}
+    <div id="mensagens" aria-live="polite">
       {% for message in messages %}
         <div class="alert alert-{{ message.level_tag }} alert-dismissible fade show" role="alert">
           {{ message }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
         </div>
       {% endfor %}
-    {% endif %}
+    </div>
 
     {% block content %}{% endblock %}
   </main>
@@ -92,6 +92,7 @@
 
   <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'js/tema.js' %}"></script>
+  <script src="{% static 'js/secoes.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

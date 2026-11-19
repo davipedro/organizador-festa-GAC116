@@ -2,6 +2,33 @@
 <section id="bloco-convidados" class="mb-4">
   <h2 class="h5">Convidados</h2>
 
+  {% form_novo_convidado as form_convidado %}
+  <form method="post" action="{% url 'festas:convidado_novo' festa.pk %}" id="form-novo-convidado"
+        class="card card-body py-3 mb-3" data-atualiza-secao data-foco aria-label="Adicionar convidado">
+    {% csrf_token %}
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-4">
+        <label for="novo-convidado-nome" class="form-label mb-1">Nome</label>
+        <input type="text" name="nome" id="novo-convidado-nome" class="form-control" maxlength="120" required placeholder="Quem você vai convidar?">
+      </div>
+      <div class="col-12 col-md-3">
+        <label for="novo-convidado-contato" class="form-label mb-1">Contato</label>
+        <input type="text" name="contato" id="novo-convidado-contato" class="form-control" maxlength="120" placeholder="Opcional">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="novo-convidado-status" class="form-label mb-1">Status</label>
+        <select name="status" id="novo-convidado-status" class="form-select">
+          {% for valor, rotulo in form_convidado.fields.status.choices %}
+            <option value="{{ valor }}" {% if valor == 'pendente' %}selected{% endif %}>{{ rotulo }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Adicionar</button>
+      </div>
+    </div>
+  </form>
+
   <div class="d-flex flex-wrap gap-2 mb-3" aria-label="Convidados por status">
     {% resumo_convidados festa as resumo %}
     {% for item in resumo %}
@@ -11,7 +38,7 @@
 
   {% with convidados=festa.convidados.all %}
     {% if convidados %}
-      <div class="table-responsive mb-3">
+      <div class="table-responsive">
         <table class="table align-middle mb-0">
           <thead>
             <tr>
@@ -44,34 +71,7 @@
         </table>
       </div>
     {% else %}
-      <p class="text-body-secondary">Nenhum convidado ainda. Adicione o primeiro abaixo.</p>
+      <p class="text-body-secondary mb-0">Nenhum convidado ainda. Use o formulário acima para adicionar o primeiro.</p>
     {% endif %}
   {% endwith %}
-
-  {% form_novo_convidado as form_convidado %}
-  <form method="post" action="{% url 'festas:convidado_novo' festa.pk %}" class="card card-body">
-    {% csrf_token %}
-    <h3 class="h6 mb-3">Adicionar convidado</h3>
-    <div class="row g-2 align-items-end">
-      <div class="col-12 col-md-4">
-        <label for="novo-convidado-nome" class="form-label mb-1">Nome</label>
-        <input type="text" name="nome" id="novo-convidado-nome" class="form-control" maxlength="120" required>
-      </div>
-      <div class="col-12 col-md-3">
-        <label for="novo-convidado-contato" class="form-label mb-1">Contato</label>
-        <input type="text" name="contato" id="novo-convidado-contato" class="form-control" maxlength="120" placeholder="Opcional">
-      </div>
-      <div class="col-6 col-md-3">
-        <label for="novo-convidado-status" class="form-label mb-1">Status</label>
-        <select name="status" id="novo-convidado-status" class="form-select">
-          {% for valor, rotulo in form_convidado.fields.status.choices %}
-            <option value="{{ valor }}" {% if valor == 'pendente' %}selected{% endif %}>{{ rotulo }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-6 col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Adicionar</button>
-      </div>
-    </div>
-  </form>
 </section>

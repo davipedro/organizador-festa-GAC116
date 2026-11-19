@@ -2,6 +2,21 @@
 <section id="bloco-tarefas" class="mb-4">
   <h2 class="h5">Tarefas</h2>
 
+  {% form_nova_tarefa as form_tarefa %}
+  <form method="post" action="{% url 'festas:tarefa_nova' festa.pk %}" id="form-nova-tarefa"
+        class="card card-body py-3 mb-3" data-atualiza-secao data-foco aria-label="Adicionar tarefa">
+    {% csrf_token %}
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-9">
+        <label for="nova-tarefa-titulo" class="form-label mb-1">Nova tarefa</label>
+        <input type="text" name="titulo" id="nova-tarefa-titulo" class="form-control" maxlength="160" required placeholder="Ex.: Comprar bebidas">
+      </div>
+      <div class="col-12 col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Adicionar</button>
+      </div>
+    </div>
+  </form>
+
   {% progresso_tarefas festa as progresso %}
   {% if progresso.total %}
     <p class="mb-1" id="progresso-tarefas">
@@ -15,10 +30,10 @@
 
   {% with tarefas=festa.tarefas.all %}
     {% if tarefas %}
-      <ul class="list-group mb-3">
+      <ul class="list-group">
         {% for tarefa in tarefas %}
           <li class="list-group-item d-flex flex-wrap align-items-center gap-2">
-            <form method="post" action="{% url 'festas:tarefa_alternar' tarefa.pk %}" class="m-0">
+            <form method="post" action="{% url 'festas:tarefa_alternar' tarefa.pk %}" class="m-0" data-atualiza-secao>
               {% csrf_token %}
               <button type="submit"
                       class="btn btn-sm {% if tarefa.concluida %}btn-success{% else %}btn-outline-secondary{% endif %}"
@@ -36,22 +51,7 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p class="text-body-secondary">Nenhuma tarefa ainda. Adicione a primeira abaixo.</p>
+      <p class="text-body-secondary mb-0">Nenhuma tarefa ainda. Use o campo acima para adicionar a primeira.</p>
     {% endif %}
   {% endwith %}
-
-  {% form_nova_tarefa as form_tarefa %}
-  <form method="post" action="{% url 'festas:tarefa_nova' festa.pk %}" class="card card-body">
-    {% csrf_token %}
-    <h3 class="h6 mb-3">Adicionar tarefa</h3>
-    <div class="row g-2 align-items-end">
-      <div class="col-12 col-md-9">
-        <label for="nova-tarefa-titulo" class="form-label mb-1">Título</label>
-        <input type="text" name="titulo" id="nova-tarefa-titulo" class="form-control" maxlength="160" required placeholder="Ex.: Comprar bebidas">
-      </div>
-      <div class="col-12 col-md-3">
-        <button type="submit" class="btn btn-primary w-100">Adicionar</button>
-      </div>
-    </div>
-  </form>
 </section>
