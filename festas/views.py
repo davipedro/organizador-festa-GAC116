@@ -108,7 +108,10 @@ def convidado_novo(request, festa_pk):
                 erro for lista in form.errors.values() for erro in lista
             )
             messages.error(request, f'Não foi possível adicionar: {erros}')
-    return redirect('festas:festa_detalhe', pk=festa.pk)
+    return redirect(
+        reverse('festas:festa_detalhe', kwargs={'pk': festa.pk})
+        + '#bloco-convidados'
+    )
 
 
 class ConvidadoDoUsuarioMixin(LoginRequiredMixin):
@@ -123,7 +126,11 @@ class ConvidadoDoUsuarioMixin(LoginRequiredMixin):
         ).select_related('festa')
 
     def get_success_url(self):
-        return reverse('festas:festa_detalhe', kwargs={'pk': self.object.festa_id})
+        # volta para a lista de convidados, não para o topo da página
+        return (
+            reverse('festas:festa_detalhe', kwargs={'pk': self.object.festa_id})
+            + '#bloco-convidados'
+        )
 
 
 class ConvidadoEditarView(
@@ -143,7 +150,7 @@ class ConvidadoExcluirView(ConvidadoDoUsuarioMixin, DeleteView):
             objeto=f'o convidado "{convidado.nome}"',
             cancelar_url=reverse(
                 'festas:festa_detalhe', kwargs={'pk': convidado.festa_id}
-            ),
+            ) + '#bloco-convidados',
             **kwargs,
         )
 
