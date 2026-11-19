@@ -1,4 +1,57 @@
+{% load tarefas_extras %}
 <section id="bloco-tarefas" class="mb-4">
   <h2 class="h5">Tarefas</h2>
-  <p class="text-body-secondary">Esta parte ainda será feita.</p>
+
+  {% progresso_tarefas festa as progresso %}
+  {% if progresso.total %}
+    <p class="mb-1" id="progresso-tarefas">
+      {{ progresso.concluidas }} de {{ progresso.total }} concluída{{ progresso.total|pluralize }}
+    </p>
+    <div class="progress mb-3" role="progressbar" aria-label="Progresso das tarefas"
+         aria-valuenow="{{ progresso.percentual }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar bg-success" style="width: {{ progresso.percentual }}%"></div>
+    </div>
+  {% endif %}
+
+  {% with tarefas=festa.tarefas.all %}
+    {% if tarefas %}
+      <ul class="list-group mb-3">
+        {% for tarefa in tarefas %}
+          <li class="list-group-item d-flex flex-wrap align-items-center gap-2">
+            <form method="post" action="{% url 'festas:tarefa_alternar' tarefa.pk %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit"
+                      class="btn btn-sm {% if tarefa.concluida %}btn-success{% else %}btn-outline-secondary{% endif %}"
+                      aria-pressed="{% if tarefa.concluida %}true{% else %}false{% endif %}"
+                      aria-label="{% if tarefa.concluida %}Marcar como pendente{% else %}Marcar como concluída{% endif %}: {{ tarefa.titulo }}">
+                {% if tarefa.concluida %}&#10003;{% else %}&#9744;{% endif %}
+              </button>
+            </form>
+            <span class="flex-grow-1 {% if tarefa.concluida %}text-decoration-line-through text-body-secondary{% endif %}">{{ tarefa.titulo }}</span>
+            <span class="text-nowrap">
+              <a class="btn btn-outline-secondary btn-sm" href="{% url 'festas:tarefa_editar' tarefa.pk %}">Editar</a>
+              <a class="btn btn-outline-danger btn-sm" href="{% url 'festas:tarefa_excluir' tarefa.pk %}">Excluir</a>
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-body-secondary">Nenhuma tarefa ainda. Adicione a primeira abaixo.</p>
+    {% endif %}
+  {% endwith %}
+
+  {% form_nova_tarefa as form_tarefa %}
+  <form method="post" action="{% url 'festas:tarefa_nova' festa.pk %}" class="card card-body">
+    {% csrf_token %}
+    <h3 class="h6 mb-3">Adicionar tarefa</h3>
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-9">
+        <label for="nova-tarefa-titulo" class="form-label mb-1">Título</label>
+        <input type="text" name="titulo" id="nova-tarefa-titulo" class="form-control" maxlength="160" required placeholder="Ex.: Comprar bebidas">
+      </div>
+      <div class="col-12 col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Adicionar</button>
+      </div>
+    </div>
+  </form>
 </section>

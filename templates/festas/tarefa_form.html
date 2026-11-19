@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar tarefa - Sua Festa{% endblock %}
+
+{% block content %}
+  <h1 class="h3 mb-1">Editar tarefa</h1>
+  <p class="text-body-secondary mb-3">Festa: {{ tarefa.festa.nome }}</p>
+  <form method="post" class="col-lg-6 p-0">
+    {% csrf_token %}
+    {% for campo in form %}
+      <div class="mb-3">
+        <label for="{{ campo.id_for_label }}" class="form-label">{{ campo.label }}</label>
+        {{ campo }}
+        {% for erro in campo.errors %}
+          <div class="text-danger small">{{ erro }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a class="btn btn-outline-secondary" href="{% url 'festas:festa_detalhe' tarefa.festa_id %}#bloco-tarefas">Cancelar</a>
+  </form>
+{% endblock %}

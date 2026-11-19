@@ -338,6 +338,10 @@ class EsqueletoDoSiteTests(TestCase):
         'festas:convidado_novo',
         'festas:convidado_editar',
         'festas:convidado_excluir',
+        'festas:tarefa_nova',
+        'festas:tarefa_alternar',
+        'festas:tarefa_editar',
+        'festas:tarefa_excluir',
     }
 
     def setUp(self):

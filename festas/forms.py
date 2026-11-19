@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Convidado, Festa
+from .models import Convidado, Festa, Tarefa
 
 
 class FestaForm(forms.ModelForm):
@@ -53,3 +53,15 @@ class ConvidadoForm(forms.ModelForm):
                 campo.widget, forms.Select
             ) else 'form-control'
             campo.widget.attrs['class'] = classe
+
+
+class TarefaForm(forms.ModelForm):
+    """Formulário da tarefa. A festa não aparece: é definida pela view."""
+
+    class Meta:
+        model = Tarefa
+        fields = ('titulo',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['titulo'].widget.attrs['class'] = 'form-control'
