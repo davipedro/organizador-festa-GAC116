@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 
 from decouple import config
+from django.contrib.messages import constants as message_constants
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -173,3 +174,13 @@ JAZZMIN_UI_TWEAKS = {
 LOGIN_URL = 'contas:login'
 LOGIN_REDIRECT_URL = 'festas:festa_lista'
 LOGOUT_REDIRECT_URL = 'contas:login'
+
+# Mensagens do Django como alertas do Bootstrap: o nível "error" do Django
+# vira a classe "alert-danger" (sem isso o alerta de erro sairia sem cor).
+MESSAGE_TAGS = {
+    message_constants.DEBUG: 'secondary',
+    message_constants.INFO: 'info',
+    message_constants.SUCCESS: 'success',
+    message_constants.WARNING: 'warning',
+    message_constants.ERROR: 'danger',
+}
