@@ -331,6 +331,19 @@ class EsqueletoDoSiteTests(TestCase):
         ('festas:tarefa_excluir', {'pk': 1}),
     ]
 
+    # Rotas que já têm tela e regras próprias (redirecionam, só aceitam POST
+    # ou dão 404 para o que não existe): são testadas nos arquivos
+    # test_convidados.py e test_tarefas.py, então não entram no teste de "200".
+    ROTAS_COM_TELA_PROPRIA = {
+        'festas:convidado_novo',
+        'festas:convidado_editar',
+        'festas:convidado_excluir',
+        'festas:tarefa_nova',
+        'festas:tarefa_alternar',
+        'festas:tarefa_editar',
+        'festas:tarefa_excluir',
+    }
+
     def setUp(self):
         self.usuario = get_user_model().objects.create_user(
             username='ana', password='senha-de-teste-123'
@@ -359,6 +372,8 @@ class EsqueletoDoSiteTests(TestCase):
     def test_todas_as_urls_do_contrato_respondem_para_quem_esta_logado(self):
         self.client.force_login(self.usuario)
         for nome, kwargs in self.rotas():
+            if nome in self.ROTAS_COM_TELA_PROPRIA:
+                continue
             with self.subTest(url=nome):
                 resposta = self.client.get(reverse(nome, kwargs=kwargs))
                 self.assertEqual(resposta.status_code, 200)

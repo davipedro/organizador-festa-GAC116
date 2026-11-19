@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Festa, Tarefa
+from .models import Convidado, Festa, Tarefa
 
 
 class FestaForm(forms.ModelForm):
@@ -29,6 +29,22 @@ class FestaForm(forms.ModelForm):
                 attrs={'step': '0.01', 'min': '0'}
             ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for campo in self.fields.values():
+            classe = 'form-select' if isinstance(
+                campo.widget, forms.Select
+            ) else 'form-control'
+            campo.widget.attrs['class'] = classe
+
+
+class ConvidadoForm(forms.ModelForm):
+    """Formulário do convidado. A festa não aparece: é definida pela view."""
+
+    class Meta:
+        model = Convidado
+        fields = ('nome', 'contato', 'status')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

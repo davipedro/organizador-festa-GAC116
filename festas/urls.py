@@ -5,7 +5,7 @@ from . import views
 app_name = 'festas'
 
 urlpatterns = [
-    path('', views.em_construcao, name='festa_lista'),
+    path('', views.FestaListaView.as_view(), name='festa_lista'),
     path('festas/nova/', views.FestaNovaView.as_view(), name='festa_nova'),
     path(
         'festas/<int:pk>/',
@@ -24,17 +24,17 @@ urlpatterns = [
     ),
     path(
         'festas/<int:festa_pk>/convidados/novo/',
-        views.em_construcao,
+        views.convidado_novo,
         name='convidado_novo',
     ),
     path(
         'convidados/<int:pk>/editar/',
-        views.em_construcao,
+        views.ConvidadoEditarView.as_view(),
         name='convidado_editar',
     ),
     path(
         'convidados/<int:pk>/excluir/',
-        views.em_construcao,
+        views.ConvidadoExcluirView.as_view(),
         name='convidado_excluir',
     ),
     path(
