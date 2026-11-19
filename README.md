@@ -15,7 +15,7 @@ Trabalho prático da disciplina **GAC116 – Programação Web** (desenvolviment
 
 O Sua Festa é um centralizador de informações de festas (aniversários, churrascos, confraternizações), convidados e custos. Cada festa tem tipo, data, horário, local, orçamento estimado e custo médio por pessoa. Dentro da festa é possível cadastrar os convidados, marcar se vão (Pendente, Vou, Talvez ou Não vou) e montar uma lista de tarefas para os preparativos.
 
-O projeto está em desenvolvimento. A primeira entrega cobre o banco de dados e o ambiente administrativo.
+O site tem duas áreas: a **área do usuário**, onde cada anfitrião se cadastra e gerencia as próprias festas, e o **ambiente administrativo** (Django Admin com tema Jazzmin), usado pela equipe para ver e filtrar todos os dados.
 
 ## Tecnologias
 
@@ -24,6 +24,8 @@ O projeto está em desenvolvimento. A primeira entrega cobre o banco de dados e 
 - SQLite
 - django-jazzmin (tema do ambiente administrativo)
 - python-decouple (configurações por variáveis de ambiente)
+- Bootstrap 5.3.3 (framework CSS, servido localmente em `static/vendor/bootstrap`, sem CDN)
+- HTML, CSS e JavaScript simples (tema claro/escuro e atualização das seções sem recarregar a página)
 
 ## Instalação
 
@@ -80,7 +82,12 @@ Pré-requisito: Python 3.12 instalado.
 python manage.py runserver
 ```
 
-O ambiente administrativo fica em http://127.0.0.1:8000/admin/. Para rodar os testes:
+Com o servidor no ar:
+
+- Área do usuário: http://127.0.0.1:8000/
+- Ambiente administrativo: http://127.0.0.1:8000/admin/ (precisa de um superusuário)
+
+Para rodar os testes:
 
 ```bash
 python manage.py test
@@ -88,28 +95,60 @@ python manage.py test
 
 ## Dados de exemplo
 
-Para carregar festas, convidados e tarefas de demonstração em um banco novo:
+Para carregar festas, convidados e tarefas de demonstração em um banco novo (depois do `migrate`):
 
-    python manage.py loaddata dados_exemplo
+```bash
+python manage.py loaddata dados_exemplo
+```
 
-Usuários de demonstração: `admin`, `ana` e `bruno`, todos com a senha `demo12345`.
+Usuários de demonstração, todos com a senha `demo12345`:
+
+| Usuário | Perfil | Festas |
+|---|---|---|
+| `ana` | anfitriã | Aniversário de 30 anos da Ana e Confraternização da empresa |
+| `bruno` | anfitrião | Churrasco de fim de ano e Chá de bebê da Carla |
+| `admin` | administrador | acessa o `/admin/` |
+
+Cada anfitrião só enxerga as próprias festas. Se tentar abrir a festa de outra pessoa, recebe a página 404.
 
 ## Principais funcionalidades
 
-Disponíveis agora, no ambiente administrativo:
+### Área do usuário
+
+- **Cadastro, login e logout.** O cadastro cria apenas anfitriões comuns, nunca administradores. O logout é feito por POST.
+- **Minhas festas.** Cards com data, local, número de confirmados e custo estimado de cada festa, com busca por texto e filtros por tipo e período (próximas, passadas ou todas).
+- **Festas.** Criar, ver, editar e excluir. Antes de excluir, o sistema mostra quantos convidados e tarefas serão apagados junto.
+- **Convidados.** Adicionar, editar, excluir e alterar o status (Pendente, Vou, Talvez ou Não vou) direto na tela da festa.
+- **Tarefas.** Adicionar, editar, excluir e marcar como concluída, com progresso das tarefas na festa.
+- **Custo.** Custo estimado = custo médio por pessoa × convidados com status "Vou". A tela avisa quando o custo passa do orçamento estimado.
+- **Perfil.** Tela com os dados do usuário logado.
+- **Interface.** Layout responsivo com Bootstrap, tema claro e escuro (a escolha fica salva no navegador) e mensagens de sucesso e erro.
+
+### Ambiente administrativo
 
 - Login com usuário e senha, usando um modelo de usuário próprio.
 - Cadastro de tipos de festa, festas, convidados e tarefas.
-- Festa com dono, tipo, data, horário, local, descrição, orçamento estimado e custo médio por pessoa.
-- Status do convidado: Pendente, Vou, Talvez ou Não vou.
 - Na tela da festa, convidados e tarefas editáveis na mesma página.
 - Na lista de festas: filtros por tipo, data e status dos convidados, busca por nome, local e dono, navegação por data e coluna com o número de confirmados.
 
-Previstas para as próximas entregas:
+## Principais rotas
 
-- Cadastro, login e logout para os usuários finais.
-- Painel "Minhas festas" com o resumo de cada festa e o custo estimado.
-- Interface responsiva, com tema claro e escuro.
+| Rota | O que faz |
+|---|---|
+| `/` | Minhas festas (exige login) |
+| `/contas/cadastro/` | Cadastro de usuário |
+| `/contas/login/` | Login |
+| `/contas/logout/` | Logout (POST) |
+| `/contas/perfil/` | Perfil do usuário |
+| `/festas/nova/` | Nova festa |
+| `/festas/<id>/` | Detalhe da festa, com convidados e tarefas |
+| `/festas/<id>/editar/` | Editar festa |
+| `/festas/<id>/excluir/` | Excluir festa (com confirmação) |
+| `/festas/<id>/convidados/novo/` | Adicionar convidado |
+| `/convidados/<id>/editar/` e `/excluir/` | Editar e excluir convidado |
+| `/festas/<id>/tarefas/nova/` | Adicionar tarefa |
+| `/tarefas/<id>/alternar/`, `/editar/` e `/excluir/` | Concluir, editar e excluir tarefa |
+| `/admin/` | Ambiente administrativo |
 
 ## Como trabalhamos (Git)
 
@@ -180,8 +219,15 @@ erDiagram
 ├── requirements.txt
 ├── .env.example           # nomes das variáveis de ambiente
 ├── organizadorfesta/      # configurações do projeto (settings, urls)
-├── contas/                # usuários (modelo Usuario)
-├── festas/                # festas, tipos de festa, convidados e tarefas
-├── static/                # logo e CSS do tema do admin
+├── contas/                # usuários: modelo Usuario, cadastro, login e perfil
+├── festas/                # festas, tipos, convidados e tarefas (modelos, views, forms, admin)
+│   ├── fixtures/          # dados de exemplo (dados_exemplo.json)
+│   └── templatetags/      # filtros usados nos templates
+├── templates/             # base.html, registration/ (login, cadastro, perfil) e festas/
+├── static/
+│   ├── vendor/bootstrap/  # Bootstrap 5.3.3 local
+│   ├── css/               # site.css (área do usuário) e admin.css (tema do admin)
+│   ├── js/                # tema.js (claro/escuro) e secoes.js (convidados e tarefas)
+│   └── img/               # logo
 └── docs/                  # diagrama ER e dicionário de dados
 ```
