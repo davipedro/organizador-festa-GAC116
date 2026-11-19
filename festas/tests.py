@@ -3,8 +3,11 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.contrib.messages.storage.base import Message
 from django.db.models import ProtectedError
+from django.template.loader import render_to_string
 from django.test import TestCase
+from django.urls import reverse
 
 from .models import Convidado, Festa, Tarefa, TipoFesta
 
@@ -60,6 +63,62 @@ class FestaTests(TestCase):
     def test_nome_legivel(self):
         self.assertEqual(str(self.tipo), 'Aniversário')
         self.assertEqual(str(self.criar_festa()), 'Aniversário da Ana (05/12/2026)')
+
+    def convidar(self, festa, status, quantidade=1):
+        for i in range(quantidade):
+            Convidado.objects.create(
+                festa=festa, nome=f'{status} {i}', status=status
+            )
+
+    def test_festa_sem_convidados_nao_tem_confirmados_nem_custo(self):
+        festa = self.criar_festa(custo_medio_por_pessoa=Decimal('50'))
+        self.assertEqual(festa.confirmados, 0)
+        self.assertEqual(festa.custo_estimado, Decimal('0'))
+
+    def test_so_o_status_vou_conta_como_confirmado(self):
+        festa = self.criar_festa()
+        self.convidar(festa, Convidado.Status.VOU, 2)
+        self.convidar(festa, Convidado.Status.PENDENTE, 3)
+        self.convidar(festa, Convidado.Status.TALVEZ, 1)
+        self.convidar(festa, Convidado.Status.NAO_VOU, 4)
+        self.assertEqual(festa.confirmados, 2)
+
+    def test_custo_estimado_e_custo_medio_vezes_confirmados(self):
+        festa = self.criar_festa(custo_medio_por_pessoa=Decimal('37.50'))
+        self.convidar(festa, Convidado.Status.VOU, 4)
+        self.convidar(festa, Convidado.Status.TALVEZ, 2)
+        self.assertEqual(festa.custo_estimado, Decimal('150.00'))
+
+    def test_confirmados_usa_a_anotacao_quando_ela_existe(self):
+        festa = self.criar_festa()
+        self.convidar(festa, Convidado.Status.VOU, 2)
+        festa.total_confirmados = 7
+        self.assertEqual(festa.confirmados, 7)
+
+    def test_custo_acima_do_orcamento_dispara_o_aviso(self):
+        festa = self.criar_festa(
+            orcamento_estimado=Decimal('100'),
+            custo_medio_por_pessoa=Decimal('30'),
+        )
+        self.convidar(festa, Convidado.Status.VOU, 4)
+        self.assertEqual(festa.custo_estimado, Decimal('120'))
+        self.assertTrue(festa.acima_do_orcamento)
+
+    def test_custo_igual_ou_abaixo_do_orcamento_nao_dispara_o_aviso(self):
+        festa = self.criar_festa(
+            orcamento_estimado=Decimal('120'),
+            custo_medio_por_pessoa=Decimal('30'),
+        )
+        self.convidar(festa, Convidado.Status.VOU, 4)
+        self.assertFalse(festa.acima_do_orcamento)
+        self.convidar(festa, Convidado.Status.VOU, 1)
+        self.assertTrue(festa.acima_do_orcamento)
+
+    def test_orcamento_zero_nunca_dispara_o_aviso(self):
+        festa = self.criar_festa(custo_medio_por_pessoa=Decimal('30'))
+        self.convidar(festa, Convidado.Status.VOU, 4)
+        self.assertGreater(festa.custo_estimado, 0)
+        self.assertFalse(festa.acima_do_orcamento)
 
 
 class AdminFestasTests(TestCase):
@@ -252,3 +311,273 @@ class AdminListaDeFestasTests(TestCase):
             formset.formset.model for formset in resposta.context['inline_admin_formsets']
         }
         self.assertEqual(modelos, {Convidado, Tarefa})
+
+
+class EsqueletoDoSiteTests(TestCase):
+    """URLs do contrato, base.html e login da área do usuário final."""
+
+    ROTAS_DO_CONTRATO = [
+        ('festas:festa_lista', {}),
+        ('festas:festa_nova', {}),
+        ('festas:festa_detalhe', {'pk': 1}),
+        ('festas:festa_editar', {'pk': 1}),
+        ('festas:festa_excluir', {'pk': 1}),
+        ('festas:convidado_novo', {'festa_pk': 1}),
+        ('festas:convidado_editar', {'pk': 1}),
+        ('festas:convidado_excluir', {'pk': 1}),
+        ('festas:tarefa_nova', {'festa_pk': 1}),
+        ('festas:tarefa_alternar', {'pk': 1}),
+        ('festas:tarefa_editar', {'pk': 1}),
+        ('festas:tarefa_excluir', {'pk': 1}),
+    ]
+
+    def setUp(self):
+        self.usuario = get_user_model().objects.create_user(
+            username='ana', password='senha-de-teste-123'
+        )
+
+    def rotas(self):
+        """Rotas do contrato com o pk de uma festa que existe de verdade."""
+        tipo = TipoFesta.objects.create(nome='Aniversário')
+        festa = Festa.objects.create(
+            dono=self.usuario,
+            tipo=tipo,
+            nome='Aniversário da Ana',
+            data=date(2026, 12, 5),
+            horario=time(19, 30),
+            local='Salão do prédio',
+        )
+        return [
+            (nome, {chave: festa.pk for chave in kwargs})
+            for nome, kwargs in self.ROTAS_DO_CONTRATO
+        ]
+
+    def test_raiz_sem_sessao_redireciona_para_o_login(self):
+        resposta = self.client.get('/')
+        self.assertRedirects(resposta, '/contas/login/?next=/')
+
+    def test_todas_as_urls_do_contrato_respondem_para_quem_esta_logado(self):
+        self.client.force_login(self.usuario)
+        for nome, kwargs in self.rotas():
+            with self.subTest(url=nome):
+                resposta = self.client.get(reverse(nome, kwargs=kwargs))
+                self.assertEqual(resposta.status_code, 200)
+
+    def test_urls_da_area_do_usuario_exigem_login(self):
+        for nome, kwargs in self.rotas():
+            with self.subTest(url=nome):
+                resposta = self.client.get(reverse(nome, kwargs=kwargs))
+                self.assertEqual(resposta.status_code, 302)
+                self.assertIn('/contas/login/', resposta['Location'])
+
+    def test_urls_de_login_logout_e_cadastro_existem(self):
+        self.assertEqual(reverse('contas:login'), '/contas/login/')
+        self.assertEqual(reverse('contas:logout'), '/contas/logout/')
+        self.assertEqual(reverse('contas:cadastro'), '/contas/cadastro/')
+        self.assertEqual(self.client.get(reverse('contas:login')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('contas:cadastro')).status_code, 200)
+
+    def test_login_leva_para_a_lista_de_festas(self):
+        resposta = self.client.post(
+            reverse('contas:login'),
+            {'username': 'ana', 'password': 'senha-de-teste-123'},
+        )
+        self.assertRedirects(resposta, reverse('festas:festa_lista'))
+
+    def test_logout_so_por_post_e_volta_para_o_login(self):
+        self.client.force_login(self.usuario)
+        self.assertEqual(
+            self.client.get(reverse('contas:logout')).status_code, 405
+        )
+        resposta = self.client.post(reverse('contas:logout'))
+        self.assertRedirects(resposta, reverse('contas:login'))
+
+    def test_base_usa_bootstrap_local_e_nao_cdn(self):
+        html = render_to_string('base.html', {'messages': []})
+        self.assertIn('vendor/bootstrap/css/bootstrap.min.css', html)
+        self.assertIn('vendor/bootstrap/js/bootstrap.bundle.min.js', html)
+        self.assertNotIn('cdn.', html)
+
+    def test_base_mostra_as_mensagens_do_django(self):
+        html = render_to_string(
+            'base.html', {'messages': [Message(25, 'Festa criada.')]}
+        )
+        self.assertIn('Festa criada.', html)
+        self.assertIn('alert-success', html)
+
+
+class FestaCrudTests(TestCase):
+    """CRUD de festas na área do usuário, com permissão por dono."""
+
+    def setUp(self):
+        usuarios = get_user_model().objects
+        self.ana = usuarios.create_user(username='ana', password='x-123456')
+        self.bruno = usuarios.create_user(username='bruno', password='x-123456')
+        self.tipo = TipoFesta.objects.create(nome='Aniversário')
+        self.festa = self.criar_festa(self.ana, nome='Aniversário da Ana')
+        self.festa_do_bruno = self.criar_festa(self.bruno, nome='Churrasco')
+        self.client.force_login(self.ana)
+
+    def criar_festa(self, dono, **extra):
+        dados = dict(
+            dono=dono,
+            tipo=self.tipo,
+            nome='Festa',
+            data=date(2026, 12, 5),
+            horario=time(19, 30),
+            local='Salão do prédio',
+        )
+        dados.update(extra)
+        return Festa.objects.create(**dados)
+
+    def dados_do_formulario(self, **extra):
+        dados = {
+            'nome': 'Festa nova',
+            'tipo': self.tipo.pk,
+            'data': '2027-01-10',
+            'horario': '20:00',
+            'local': 'Chácara',
+            'descricao': '',
+            'orcamento_estimado': '1000.00',
+            'custo_medio_por_pessoa': '50.00',
+        }
+        dados.update(extra)
+        return dados
+
+    def test_criar_festa_define_o_usuario_logado_como_dono(self):
+        resposta = self.client.post(
+            reverse('festas:festa_nova'),
+            self.dados_do_formulario(dono=self.bruno.pk),
+        )
+        festa = Festa.objects.get(nome='Festa nova')
+        self.assertEqual(festa.dono, self.ana)
+        self.assertRedirects(
+            resposta, reverse('festas:festa_detalhe', kwargs={'pk': festa.pk})
+        )
+
+    def test_criar_festa_mostra_mensagem_de_sucesso(self):
+        resposta = self.client.post(
+            reverse('festas:festa_nova'),
+            self.dados_do_formulario(),
+            follow=True,
+        )
+        self.assertContains(resposta, 'Festa &quot;Festa nova&quot; criada.')
+
+    def test_formulario_oferece_os_tipos_cadastrados(self):
+        TipoFesta.objects.create(nome='Churrasco')
+        resposta = self.client.get(reverse('festas:festa_nova'))
+        self.assertContains(resposta, 'Aniversário')
+        self.assertContains(resposta, 'Churrasco')
+        self.assertNotIn('dono', resposta.context['form'].fields)
+
+    def test_formulario_invalido_nao_cria_festa(self):
+        resposta = self.client.post(
+            reverse('festas:festa_nova'), self.dados_do_formulario(nome='')
+        )
+        self.assertEqual(resposta.status_code, 200)
+        self.assertFalse(Festa.objects.filter(local='Chácara').exists())
+
+    def test_detalhe_mostra_dados_confirmados_e_custo(self):
+        festa = self.criar_festa(
+            self.ana,
+            nome='Com custo',
+            orcamento_estimado=Decimal('100'),
+            custo_medio_por_pessoa=Decimal('30'),
+        )
+        for i in range(4):
+            Convidado.objects.create(
+                festa=festa, nome=f'Convidado {i}', status=Convidado.Status.VOU
+            )
+        resposta = self.client.get(
+            reverse('festas:festa_detalhe', kwargs={'pk': festa.pk})
+        )
+        self.assertContains(resposta, 'Com custo')
+        self.assertContains(resposta, 'R$ 120,00')
+        self.assertContains(resposta, 'R$ 100,00')
+        self.assertContains(resposta, 'acima do orçamento')
+
+    def test_detalhe_sem_estouro_nao_mostra_o_aviso(self):
+        resposta = self.client.get(
+            reverse('festas:festa_detalhe', kwargs={'pk': self.festa.pk})
+        )
+        self.assertNotContains(resposta, 'acima do orçamento')
+
+    def test_editar_festa_altera_os_dados(self):
+        resposta = self.client.post(
+            reverse('festas:festa_editar', kwargs={'pk': self.festa.pk}),
+            self.dados_do_formulario(nome='Nome novo'),
+        )
+        self.festa.refresh_from_db()
+        self.assertEqual(self.festa.nome, 'Nome novo')
+        self.assertEqual(self.festa.dono, self.ana)
+        self.assertRedirects(
+            resposta,
+            reverse('festas:festa_detalhe', kwargs={'pk': self.festa.pk}),
+        )
+
+    def test_confirmacao_de_exclusao_avisa_sobre_a_cascata(self):
+        Convidado.objects.create(festa=self.festa, nome='Carla')
+        Tarefa.objects.create(festa=self.festa, titulo='Comprar bolo')
+        Tarefa.objects.create(festa=self.festa, titulo='Decorar')
+        resposta = self.client.get(
+            reverse('festas:festa_excluir', kwargs={'pk': self.festa.pk})
+        )
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, '1 convidado(s) e 2 tarefa(s)')
+        self.assertTrue(Festa.objects.filter(pk=self.festa.pk).exists())
+
+    def test_excluir_festa_apaga_convidados_e_tarefas(self):
+        Convidado.objects.create(festa=self.festa, nome='Carla')
+        Tarefa.objects.create(festa=self.festa, titulo='Comprar bolo')
+        resposta = self.client.post(
+            reverse('festas:festa_excluir', kwargs={'pk': self.festa.pk}),
+            follow=True,
+        )
+        self.assertRedirects(resposta, reverse('festas:festa_lista'))
+        self.assertContains(resposta, 'excluída')
+        self.assertFalse(Festa.objects.filter(pk=self.festa.pk).exists())
+        self.assertEqual(Convidado.objects.count(), 0)
+        self.assertEqual(Tarefa.objects.count(), 0)
+
+    def test_festa_de_outro_usuario_da_404_em_todas_as_telas(self):
+        pk = {'pk': self.festa_do_bruno.pk}
+        for nome in ('festas:festa_detalhe', 'festas:festa_editar',
+                     'festas:festa_excluir'):
+            with self.subTest(tela=nome):
+                resposta = self.client.get(reverse(nome, kwargs=pk))
+                self.assertEqual(resposta.status_code, 404)
+
+    def test_nao_edita_nem_exclui_festa_de_outro_usuario(self):
+        pk = {'pk': self.festa_do_bruno.pk}
+        resposta = self.client.post(
+            reverse('festas:festa_editar', kwargs=pk),
+            self.dados_do_formulario(nome='Invadida'),
+        )
+        self.assertEqual(resposta.status_code, 404)
+        resposta = self.client.post(reverse('festas:festa_excluir', kwargs=pk))
+        self.assertEqual(resposta.status_code, 404)
+        self.festa_do_bruno.refresh_from_db()
+        self.assertEqual(self.festa_do_bruno.nome, 'Churrasco')
+
+    def test_administrador_tambem_so_ve_as_proprias_festas(self):
+        admin = get_user_model().objects.create_superuser(
+            username='admin', password='x-123456'
+        )
+        self.client.force_login(admin)
+        resposta = self.client.get(
+            reverse('festas:festa_detalhe', kwargs={'pk': self.festa.pk})
+        )
+        self.assertEqual(resposta.status_code, 404)
+
+    def test_visitante_vai_para_o_login(self):
+        self.client.logout()
+        for nome, kwargs in (
+            ('festas:festa_nova', {}),
+            ('festas:festa_detalhe', {'pk': self.festa.pk}),
+            ('festas:festa_editar', {'pk': self.festa.pk}),
+            ('festas:festa_excluir', {'pk': self.festa.pk}),
+        ):
+            with self.subTest(tela=nome):
+                resposta = self.client.get(reverse(nome, kwargs=kwargs))
+                self.assertEqual(resposta.status_code, 302)
+                self.assertIn('/contas/login/', resposta['Location'])
