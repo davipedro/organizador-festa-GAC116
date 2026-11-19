@@ -60,6 +60,33 @@ class Festa(models.Model):
     def __str__(self):
         return f'{self.nome} ({self.data:%d/%m/%Y})'
 
+    @property
+    def confirmados(self):
+        """Número de convidados com status "Vou".
+
+        Se a consulta já trouxe a anotação ``total_confirmados`` (como o admin
+        faz), usa esse valor em vez de contar de novo no banco.
+        """
+        if hasattr(self, 'total_confirmados'):
+            return self.total_confirmados
+        return self.convidados.filter(status=Convidado.Status.VOU).count()
+
+    @property
+    def custo_estimado(self):
+        """Custo médio por pessoa vezes o número de confirmados."""
+        return self.custo_medio_por_pessoa * self.confirmados
+
+    @property
+    def acima_do_orcamento(self):
+        """Indica se o custo estimado passou do orçamento estimado.
+
+        Orçamento zero significa "não informado", então nunca dispara o aviso.
+        """
+        return (
+            self.orcamento_estimado > 0
+            and self.custo_estimado > self.orcamento_estimado
+        )
+
 
 class Convidado(models.Model):
     """Pessoa convidada para uma festa, com o status da confirmação."""
