@@ -1,7 +1,8 @@
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, TemplateView
 
 from .forms import CadastroForm
 
@@ -22,3 +23,9 @@ class CadastroView(CreateView):
         resposta = super().form_valid(form)
         login(self.request, self.object)
         return resposta
+
+
+class PerfilView(LoginRequiredMixin, TemplateView):
+    """Perfil: mostra os dados do usuário logado, só para leitura."""
+
+    template_name = 'registration/perfil.html'

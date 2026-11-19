@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil - Sua Festa{% endblock %}
+
+{% block content %}
+  <div class="cartao-auth">
+    <h1 class="h3 mb-3">Perfil</h1>
+    <div class="card">
+      <div class="card-body p-4">
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Nome</dt>
+          <dd class="col-sm-8" id="perfil-nome">{{ user.first_name|default:"Não informado" }}</dd>
+
+          <dt class="col-sm-4">Sobrenome</dt>
+          <dd class="col-sm-8" id="perfil-sobrenome">{{ user.last_name|default:"Não informado" }}</dd>
+
+          <dt class="col-sm-4">E-mail</dt>
+          <dd class="col-sm-8" id="perfil-email">{{ user.email|default:"Não informado" }}</dd>
+
+          <dt class="col-sm-4">Usuário</dt>
+          <dd class="col-sm-8 mb-0" id="perfil-usuario">{{ user.username }}</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="mt-3 mb-0">
+      <a href="{% url 'festas:festa_lista' %}">Voltar para Minhas festas</a>
+    </p>
+  </div>
+{% endblock %}
