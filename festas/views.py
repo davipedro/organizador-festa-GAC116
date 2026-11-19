@@ -256,7 +256,10 @@ def tarefa_nova(request, festa_pk):
                 erro for lista in form.errors.values() for erro in lista
             )
             messages.error(request, f'Não foi possível adicionar: {erros}')
-    return redirect('festas:festa_detalhe', pk=festa.pk)
+    return redirect(
+        reverse('festas:festa_detalhe', kwargs={'pk': festa.pk})
+        + '#bloco-tarefas'
+    )
 
 
 class TarefaDoUsuarioMixin(LoginRequiredMixin):
@@ -271,7 +274,11 @@ class TarefaDoUsuarioMixin(LoginRequiredMixin):
         ).select_related('festa')
 
     def get_success_url(self):
-        return reverse('festas:festa_detalhe', kwargs={'pk': self.object.festa_id})
+        # volta para a lista de tarefas, não para o topo da página
+        return (
+            reverse('festas:festa_detalhe', kwargs={'pk': self.object.festa_id})
+            + '#bloco-tarefas'
+        )
 
 
 @login_required
@@ -283,7 +290,11 @@ def tarefa_alternar(request, pk):
     )
     tarefa.concluida = not tarefa.concluida
     tarefa.save(update_fields=['concluida'])
-    return redirect('festas:festa_detalhe', pk=tarefa.festa_id)
+    # sem a âncora a página voltaria para o topo a cada clique no "check"
+    return redirect(
+        reverse('festas:festa_detalhe', kwargs={'pk': tarefa.festa_id})
+        + '#bloco-tarefas'
+    )
 
 
 class TarefaEditarView(TarefaDoUsuarioMixin, SuccessMessageMixin, UpdateView):
@@ -301,7 +312,7 @@ class TarefaExcluirView(TarefaDoUsuarioMixin, DeleteView):
             objeto=f'a tarefa "{tarefa.titulo}"',
             cancelar_url=reverse(
                 'festas:festa_detalhe', kwargs={'pk': tarefa.festa_id}
-            ),
+            ) + '#bloco-tarefas',
             **kwargs,
         )
 

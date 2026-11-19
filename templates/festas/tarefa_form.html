@@ -17,6 +17,6 @@
       </div>
     {% endfor %}
     <button type="submit" class="btn btn-primary">Salvar</button>
-    <a class="btn btn-outline-secondary" href="{% url 'festas:festa_detalhe' tarefa.festa_id %}">Cancelar</a>
+    <a class="btn btn-outline-secondary" href="{% url 'festas:festa_detalhe' tarefa.festa_id %}#bloco-tarefas">Cancelar</a>
   </form>
 {% endblock %}

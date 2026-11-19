@@ -37,6 +37,10 @@ class TarefasNoDetalheTests(TestCase):
     def detalhe(self):
         return reverse('festas:festa_detalhe', args=[self.festa.pk])
 
+    def volta_para_tarefas(self):
+        # as ações voltam para a seção de tarefas, não para o topo da página
+        return self.detalhe() + '#bloco-tarefas'
+
     def test_detalhe_lista_as_tarefas_da_festa(self):
         resposta = self.client.get(self.detalhe())
         self.assertContains(resposta, 'Comprar bebidas')
@@ -77,7 +81,7 @@ class TarefasNoDetalheTests(TestCase):
             {'titulo': 'Alugar mesas'},
             follow=True,
         )
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_tarefas())
         self.assertContains(resposta, 'Tarefa &quot;Alugar mesas&quot; adicionada.')
         nova = Tarefa.objects.get(titulo='Alugar mesas')
         self.assertEqual(nova.festa, self.festa)
@@ -97,13 +101,13 @@ class TarefasNoDetalheTests(TestCase):
         resposta = self.client.get(
             reverse('festas:tarefa_nova', args=[self.festa.pk])
         )
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_tarefas())
 
     def test_editar_muda_o_titulo(self):
         url = reverse('festas:tarefa_editar', args=[self.tarefa.pk])
         self.assertEqual(self.client.get(url).status_code, 200)
         resposta = self.client.post(url, {'titulo': 'Comprar gelo'}, follow=True)
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_tarefas())
         self.assertContains(resposta, 'atualizada')
         self.tarefa.refresh_from_db()
         self.assertEqual(self.tarefa.titulo, 'Comprar gelo')
@@ -111,7 +115,7 @@ class TarefasNoDetalheTests(TestCase):
     def test_alternar_inverte_e_duas_vezes_volta_ao_original(self):
         url = reverse('festas:tarefa_alternar', args=[self.tarefa.pk])
         resposta = self.client.post(url)
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_tarefas())
         self.tarefa.refresh_from_db()
         self.assertTrue(self.tarefa.concluida)
         self.client.post(url)
@@ -133,7 +137,7 @@ class TarefasNoDetalheTests(TestCase):
         self.assertContains(tela, 'Comprar bebidas')
         self.assertTrue(Tarefa.objects.filter(pk=self.tarefa.pk).exists())
         resposta = self.client.post(url, follow=True)
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_tarefas())
         self.assertContains(resposta, 'removida')
         self.assertFalse(Tarefa.objects.filter(pk=self.tarefa.pk).exists())
 
