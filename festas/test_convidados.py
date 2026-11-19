@@ -60,7 +60,7 @@ class ConvidadosNoDetalheTests(TestCase):
             {'nome': 'Helena', 'contato': '(35) 99999-0000', 'status': 'vou'},
             follow=True,
         )
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_convidados())
         self.assertContains(resposta, 'Convidado &quot;Helena&quot; adicionado.')
         novo = Convidado.objects.get(nome='Helena')
         self.assertEqual(novo.festa, self.festa)
@@ -80,7 +80,7 @@ class ConvidadosNoDetalheTests(TestCase):
             {'nome': '', 'status': 'vou'},
             follow=True,
         )
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_convidados())
         self.assertContains(resposta, 'Não foi possível adicionar')
         self.assertEqual(Convidado.objects.count(), total)
 
@@ -96,7 +96,7 @@ class ConvidadosNoDetalheTests(TestCase):
         resposta = self.client.get(
             reverse('festas:convidado_novo', args=[self.festa.pk])
         )
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_convidados())
         self.assertEqual(Convidado.objects.filter(festa=self.festa).count(), 1)
 
     def test_editar_muda_nome_contato_e_status(self):
@@ -108,7 +108,7 @@ class ConvidadosNoDetalheTests(TestCase):
              'status': 'talvez'},
             follow=True,
         )
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_convidados())
         self.assertContains(resposta, 'atualizado')
         self.convidado.refresh_from_db()
         self.assertEqual(self.convidado.nome, 'Carla Souza')
@@ -122,7 +122,7 @@ class ConvidadosNoDetalheTests(TestCase):
         self.assertContains(tela, 'Carla')
         self.assertTrue(Convidado.objects.filter(pk=self.convidado.pk).exists())
         resposta = self.client.post(url, follow=True)
-        self.assertRedirects(resposta, self.detalhe())
+        self.assertRedirects(resposta, self.volta_para_convidados())
         self.assertContains(resposta, 'removido')
         self.assertFalse(Convidado.objects.filter(pk=self.convidado.pk).exists())
 
