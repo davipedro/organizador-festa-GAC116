@@ -39,6 +39,10 @@ class ConvidadosNoDetalheTests(TestCase):
     def detalhe(self):
         return reverse('festas:festa_detalhe', args=[self.festa.pk])
 
+    def volta_para_convidados(self):
+        # as ações voltam para a seção de convidados, não para o topo
+        return self.detalhe() + '#bloco-convidados'
+
     def test_detalhe_lista_convidados_com_status_e_contagem(self):
         Convidado.objects.create(festa=self.festa, nome='Eva', status='vou')
         Convidado.objects.create(festa=self.festa, nome='Fabio', status='vou')
