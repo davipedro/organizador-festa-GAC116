@@ -16,7 +16,7 @@
           <thead>
             <tr>
               <th scope="col">Nome</th>
-              <th scope="col">Contato</th>
+              <th scope="col" class="d-none d-md-table-cell">Contato</th>
               <th scope="col">Status</th>
               <th scope="col" class="text-end">Ações</th>
             </tr>
@@ -24,12 +24,19 @@
           <tbody>
             {% for convidado in convidados %}
               <tr>
-                <td>{{ convidado.nome }}</td>
-                <td>{{ convidado.contato|default:"-" }}</td>
+                <td>
+                  {{ convidado.nome }}
+                  {% if convidado.contato %}
+                    <div class="small text-body-secondary d-md-none">{{ convidado.contato }}</div>
+                  {% endif %}
+                </td>
+                <td class="d-none d-md-table-cell">{{ convidado.contato|default:"-" }}</td>
                 <td><span class="badge {{ convidado.status|classe_status }}">{{ convidado.get_status_display }}</span></td>
-                <td class="text-end text-nowrap">
-                  <a class="btn btn-outline-secondary btn-sm" href="{% url 'festas:convidado_editar' convidado.pk %}">Editar</a>
-                  <a class="btn btn-outline-danger btn-sm" href="{% url 'festas:convidado_excluir' convidado.pk %}">Excluir</a>
+                <td class="text-end">
+                  <div class="d-flex flex-column flex-sm-row gap-1 justify-content-end">
+                    <a class="btn btn-outline-secondary btn-sm" href="{% url 'festas:convidado_editar' convidado.pk %}">Editar</a>
+                    <a class="btn btn-outline-danger btn-sm" href="{% url 'festas:convidado_excluir' convidado.pk %}">Excluir</a>
+                  </div>
                 </td>
               </tr>
             {% endfor %}
