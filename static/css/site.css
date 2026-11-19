@@ -117,6 +117,33 @@ h4,
     --bs-btn-active-border-color: var(--cor-primaria-hover);
 }
 
+.btn-outline-secondary {
+    --bs-btn-color: var(--cor-texto);
+    --bs-btn-border-color: var(--cor-borda);
+    --bs-btn-hover-color: var(--cor-primaria);
+    --bs-btn-hover-bg: var(--cor-primaria-suave);
+    --bs-btn-hover-border-color: var(--cor-primaria);
+    --bs-btn-active-color: var(--cor-primaria);
+    --bs-btn-active-bg: var(--cor-primaria-suave);
+    --bs-btn-active-border-color: var(--cor-primaria);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: #b02a37;
+    --bs-btn-border-color: #b02a37;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #b02a37;
+    --bs-btn-hover-border-color: #b02a37;
+}
+
+[data-bs-theme='dark'] .btn-outline-danger {
+    --bs-btn-color: #ff9aa2;
+    --bs-btn-border-color: #ff9aa2;
+    --bs-btn-hover-color: #2a0a0e;
+    --bs-btn-hover-bg: #ff9aa2;
+    --bs-btn-hover-border-color: #ff9aa2;
+}
+
 /* Navbar */
 .site-navbar {
     background: var(--cor-superficie);
@@ -190,6 +217,30 @@ h4,
     box-shadow: var(--sombra);
 }
 
+/* Listas, tabelas, barra de progresso e alertas seguem a cor da superfície */
+.list-group {
+    --bs-list-group-bg: var(--cor-superficie);
+    --bs-list-group-color: var(--cor-texto);
+    --bs-list-group-border-color: var(--cor-borda);
+    --bs-list-group-border-radius: var(--raio-md);
+    box-shadow: var(--sombra);
+}
+
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--cor-texto);
+    --bs-table-border-color: var(--cor-borda);
+}
+
+.progress {
+    --bs-progress-bg: var(--cor-primaria-suave);
+    --bs-progress-border-radius: 999px;
+}
+
+.alert {
+    border-radius: var(--raio-md);
+}
+
 /* Formulários (inclui os que o Django desenha com as_p) */
 .form-control,
 .form-select {
@@ -253,6 +304,23 @@ h4,
 .cartao-auth {
     max-width: 28rem;
     margin-inline: auto;
+}
+
+/* Mensagens: avisos fixos no canto, visíveis em qualquer ponto da página */
+#mensagens {
+    position: fixed;
+    top: 4.75rem;
+    right: var(--espaco-md);
+    left: var(--espaco-md);
+    z-index: 1080;
+    max-width: 24rem;
+    margin-left: auto;
+    pointer-events: none;
+}
+
+#mensagens .alert {
+    pointer-events: auto;
+    box-shadow: var(--sombra);
 }
 
 /* Rodapé */

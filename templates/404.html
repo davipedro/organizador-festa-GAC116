@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Página não encontrada - Sua Festa{% endblock %}
+
+{% block content %}
+  <div class="text-center py-5">
+    <p class="display-1 fw-bold mb-0" style="color: var(--cor-primaria);">404</p>
+    <h1 class="h3 mb-2">Página não encontrada</h1>
+    <p class="text-body-secondary mb-4">
+      Essa página não existe ou você não tem acesso a ela.
+    </p>
+    <a class="btn btn-primary" href="{% url 'festas:festa_lista' %}">Voltar para Minhas festas</a>
+  </div>
+{% endblock %}

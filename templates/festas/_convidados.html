@@ -2,53 +2,14 @@
 <section id="bloco-convidados" class="mb-4">
   <h2 class="h5">Convidados</h2>
 
-  <div class="d-flex flex-wrap gap-2 mb-3" aria-label="Convidados por status">
-    {% resumo_convidados festa as resumo %}
-    {% for item in resumo %}
-      <span class="badge {{ item.classe }}">{{ item.rotulo }}: {{ item.total }}</span>
-    {% endfor %}
-  </div>
-
-  {% with convidados=festa.convidados.all %}
-    {% if convidados %}
-      <div class="table-responsive mb-3">
-        <table class="table align-middle mb-0">
-          <thead>
-            <tr>
-              <th scope="col">Nome</th>
-              <th scope="col">Contato</th>
-              <th scope="col">Status</th>
-              <th scope="col" class="text-end">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for convidado in convidados %}
-              <tr>
-                <td>{{ convidado.nome }}</td>
-                <td>{{ convidado.contato|default:"-" }}</td>
-                <td><span class="badge {{ convidado.status|classe_status }}">{{ convidado.get_status_display }}</span></td>
-                <td class="text-end text-nowrap">
-                  <a class="btn btn-outline-secondary btn-sm" href="{% url 'festas:convidado_editar' convidado.pk %}">Editar</a>
-                  <a class="btn btn-outline-danger btn-sm" href="{% url 'festas:convidado_excluir' convidado.pk %}">Excluir</a>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="text-body-secondary">Nenhum convidado ainda. Adicione o primeiro abaixo.</p>
-    {% endif %}
-  {% endwith %}
-
   {% form_novo_convidado as form_convidado %}
-  <form method="post" action="{% url 'festas:convidado_novo' festa.pk %}" class="card card-body">
+  <form method="post" action="{% url 'festas:convidado_novo' festa.pk %}" id="form-novo-convidado"
+        class="card card-body py-3 mb-3" data-atualiza-secao data-foco aria-label="Adicionar convidado">
     {% csrf_token %}
-    <h3 class="h6 mb-3">Adicionar convidado</h3>
     <div class="row g-2 align-items-end">
       <div class="col-12 col-md-4">
         <label for="novo-convidado-nome" class="form-label mb-1">Nome</label>
-        <input type="text" name="nome" id="novo-convidado-nome" class="form-control" maxlength="120" required>
+        <input type="text" name="nome" id="novo-convidado-nome" class="form-control" maxlength="120" required placeholder="Quem você vai convidar?">
       </div>
       <div class="col-12 col-md-3">
         <label for="novo-convidado-contato" class="form-label mb-1">Contato</label>
@@ -67,4 +28,50 @@
       </div>
     </div>
   </form>
+
+  <div class="d-flex flex-wrap gap-2 mb-3" aria-label="Convidados por status">
+    {% resumo_convidados festa as resumo %}
+    {% for item in resumo %}
+      <span class="badge {{ item.classe }}">{{ item.rotulo }}: {{ item.total }}</span>
+    {% endfor %}
+  </div>
+
+  {% with convidados=festa.convidados.all %}
+    {% if convidados %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col" class="d-none d-md-table-cell">Contato</th>
+              <th scope="col">Status</th>
+              <th scope="col" class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for convidado in convidados %}
+              <tr>
+                <td>
+                  {{ convidado.nome }}
+                  {% if convidado.contato %}
+                    <div class="small text-body-secondary d-md-none">{{ convidado.contato }}</div>
+                  {% endif %}
+                </td>
+                <td class="d-none d-md-table-cell">{{ convidado.contato|default:"-" }}</td>
+                <td><span class="badge {{ convidado.status|classe_status }}">{{ convidado.get_status_display }}</span></td>
+                <td class="text-end">
+                  <div class="d-flex flex-column flex-sm-row gap-1 justify-content-end">
+                    <a class="btn btn-outline-secondary btn-sm" href="{% url 'festas:convidado_editar' convidado.pk %}">Editar</a>
+                    <a class="btn btn-outline-danger btn-sm" href="{% url 'festas:convidado_excluir' convidado.pk %}">Excluir</a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-body-secondary mb-0">Nenhum convidado ainda. Use o formulário acima para adicionar o primeiro.</p>
+    {% endif %}
+  {% endwith %}
 </section>
