@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count, Q
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic import (
@@ -14,7 +14,7 @@ from django.views.generic import (
     UpdateView,
 )
 
-from .forms import FestaForm
+from .forms import ConvidadoForm, FestaForm
 from .models import Convidado, Festa, TipoFesta
 
 
@@ -84,6 +84,81 @@ class FestaExcluirView(FestaDoUsuarioMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, f'Festa "{self.object.nome}" excluída.')
         return super().form_valid(form)
+
+
+@login_required
+def convidado_novo(request, festa_pk):
+    """Adiciona um convidado pelo formulário do detalhe da festa (só POST).
+
+    A festa precisa ser do usuário logado, senão dá 404. Por GET só volta
+    para o detalhe.
+    """
+    festa = get_object_or_404(Festa, pk=festa_pk, dono=request.user)
+    if request.method == 'POST':
+        form = ConvidadoForm(request.POST)
+        if form.is_valid():
+            convidado = form.save(commit=False)
+            convidado.festa = festa
+            convidado.save()
+            messages.success(
+                request, f'Convidado "{convidado.nome}" adicionado.'
+            )
+        else:
+            erros = ' '.join(
+                erro for lista in form.errors.values() for erro in lista
+            )
+            messages.error(request, f'Não foi possível adicionar: {erros}')
+    return redirect(
+        reverse('festas:festa_detalhe', kwargs={'pk': festa.pk})
+        + '#bloco-convidados'
+    )
+
+
+class ConvidadoDoUsuarioMixin(LoginRequiredMixin):
+    """Só enxerga convidados de festas do usuário logado: os outros dão 404."""
+
+    model = Convidado
+    context_object_name = 'convidado'
+
+    def get_queryset(self):
+        return Convidado.objects.filter(
+            festa__dono=self.request.user
+        ).select_related('festa')
+
+    def get_success_url(self):
+        # volta para a lista de convidados, não para o topo da página
+        return (
+            reverse('festas:festa_detalhe', kwargs={'pk': self.object.festa_id})
+            + '#bloco-convidados'
+        )
+
+
+class ConvidadoEditarView(
+    ConvidadoDoUsuarioMixin, SuccessMessageMixin, UpdateView
+):
+    form_class = ConvidadoForm
+    template_name = 'festas/convidado_form.html'
+    success_message = 'Convidado "%(nome)s" atualizado.'
+
+
+class ConvidadoExcluirView(ConvidadoDoUsuarioMixin, DeleteView):
+    template_name = 'festas/confirmar_exclusao.html'
+
+    def get_context_data(self, **kwargs):
+        convidado = self.object
+        return super().get_context_data(
+            objeto=f'o convidado "{convidado.nome}"',
+            cancelar_url=reverse(
+                'festas:festa_detalhe', kwargs={'pk': convidado.festa_id}
+            ) + '#bloco-convidados',
+            **kwargs,
+        )
+
+    def form_valid(self, form):
+        nome = self.object.nome
+        resposta = super().form_valid(form)
+        messages.success(self.request, f'Convidado "{nome}" removido.')
+        return resposta
 
 
 class FestaListaView(LoginRequiredMixin, ListView):

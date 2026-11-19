@@ -24,17 +24,17 @@ urlpatterns = [
     ),
     path(
         'festas/<int:festa_pk>/convidados/novo/',
-        views.em_construcao,
+        views.convidado_novo,
         name='convidado_novo',
     ),
     path(
         'convidados/<int:pk>/editar/',
-        views.em_construcao,
+        views.ConvidadoEditarView.as_view(),
         name='convidado_editar',
     ),
     path(
         'convidados/<int:pk>/excluir/',
-        views.em_construcao,
+        views.ConvidadoExcluirView.as_view(),
         name='convidado_excluir',
     ),
     path(
